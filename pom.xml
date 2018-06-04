@@ -4,7 +4,7 @@
 
   <groupId>pucrs.sisop</groupId>
   <artifactId>trabalho.final</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.1</version>
   <packaging>jar</packaging>
 
   <name>trabalho.final</name>
