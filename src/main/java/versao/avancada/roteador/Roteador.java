@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
@@ -16,6 +17,7 @@ public class Roteador {
     public static void main(String[] args) throws IOException {
     	
     	Semaphore mutex = new Semaphore(1);
+    	String localHost = InetAddress.getLocalHost().getHostName();
        
         ArrayList<String> routesNextDoor = new ArrayList<>();
         
@@ -30,7 +32,7 @@ public class Roteador {
             return;
         }        
       
-        TabelaRoteamento tabela = new TabelaRoteamento(routesNextDoor);        
+        TabelaRoteamento tabela = new TabelaRoteamento(routesNextDoor, localHost);        
         Thread receiver = new Thread(new MessageReceiver(tabela, mutex));        
         Thread sender = new Thread(new MessageSender(tabela, routesNextDoor, mutex));
         

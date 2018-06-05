@@ -5,18 +5,28 @@ import java.util.HashMap;
 
 public class TabelaRoteamento {
 
-	private ArrayList<String> ipList;
+	private ArrayList<String> completeTable;	
 	private ArrayList<String> routersNextDoor;
 	private boolean changed;
+	private String localHost;
+	private String datagramHost;
+	private String lastTable="";
 
-	public TabelaRoteamento(ArrayList<String> routersNextDoor){
+	public TabelaRoteamento(ArrayList<String> routersNextDoor, String localHost){
+
 		this.routersNextDoor = routersNextDoor;
-		this.ipList = new ArrayList<>();
 		this.changed = false;
-		
+		this.completeTable = new ArrayList<>();
+		this.localHost = localHost;
+		firstUpdateTable();
+
+	}
+
+	private void firstUpdateTable() {
 		for(String x : routersNextDoor) {
-			ipList.add(x+";"+1);			
+			completeTable.add(x+";"+1+";"+x);			
 		}
+
 	}
 
 	public boolean isChanged() {
@@ -25,78 +35,134 @@ public class TabelaRoteamento {
 
 
 
-	public void updateTabela(String receivedTable){
-		
-		String lastTable = get_tabela_string();		
 
-		if(receivedTable.equalsIgnoreCase("!") == false) {
-			String[] stringWithoutBlankSpace = receivedTable.split("\\*");		
-			HashMap<String, Integer> mapIp = new HashMap<>();
 
-			for(int i = 1; i< stringWithoutBlankSpace.length;i++) {
-				String [] tupla = stringWithoutBlankSpace[i].split(";"); 
-				String ip = tupla[0];			
-				Integer metric = Integer.parseInt(tupla[1]);
-				metric++;
 
-				if(routersNextDoor.contains(ip) == false) {			
-					mapIp.put(ip, metric);
-				}else {
-					mapIp.put(ip,1);
-				}
-			}
 
-			HashMap<String, Integer> mapOf = new HashMap<>();
-			
-			if(ipList.size() >0) {
-				for(String x:ipList) {
-					String [] tupla = x.split(";"); 
-					String ip = tupla[0];			
-					Integer metric = Integer.parseInt(tupla[1]);				
-					mapIp.put(ip, metric);						
-				}				
-			}			
 
-			ipList.clear();
-			for(String x:mapIp.keySet()) {
-				if(mapOf.containsKey(x)) {
-					if(mapIp.get(x) == mapOf.get(x)) {
-						ipList.add(x+";"+mapIp.get(x));
-					}else if(mapIp.get(x) < mapOf.get(x)) {
-						ipList.add(x+";"+mapIp.get(x));
-					} else {
-						ipList.add(x+";"+mapOf.get(x));
-					}										
-				}else {
-					ipList.add(x+";"+mapIp.get(x));					
-				}				
-			}			
-		}	
-		
-		if(get_tabela_string().equalsIgnoreCase(lastTable) == false) {
+
+
+
+
+
+
+	public void updateTabela(String receivedTable, String datagramHost){
+		this.datagramHost = datagramHost;
+
+
+		if(receivedTable.equalsIgnoreCase("!")) {
 			this.changed = true;
-		}else {			
-			this.changed = false;
-			String aux = get_tabela_string();			
-			String[] stringWithoutBlankSpace = aux.split("\\*");			
-			String update = "";			
-			for(String x:stringWithoutBlankSpace) {				
-				update = update +x+"\n";
-			}			
-			System.out.println("\nRouting Table"+ update);			
-		}		
+		}else {
+
+			String[] splitedByAsterisk = receivedTable.split("\\*");	
+			for(int i = 1 ; i<splitedByAsterisk.length;i++) {
+				String[] splitedByComaDot = splitedByAsterisk[i].split(";");
+
+				String ip = splitedByComaDot[0];
+				int metric = Integer.parseInt(splitedByComaDot[1])+1;
+
+				if(ip.equalsIgnoreCase(this.localHost)) {
+
+				}else if(routersNextDoor.contains(ip)) {
+
+				}else {
+					completeTable.add(ip+";"+metric+";"+datagramHost);
+				}						
+			}
+			
+			int aux = completeTable.size();
+			ArrayList<String > listAux = new ArrayList<>();
+			
+			int i;
+			int j;
+			
+			for( i = 0; i < aux; i++) {
+				String[] tuplaA = completeTable.get(i).split(";");
+
+				String ipA = tuplaA[0];
+				int meticA = Integer.parseInt(tuplaA[1]);
+				
+				System.out.println(completeTable.size());
+
+				for( j = i+1; j < aux-1; j++) {
+					String[] tuplaB = completeTable.get(j).split(";"); 
+					
+					System.out.println(i +"   "+j +"\n");
+
+					String ipB = tuplaB[0]; 
+					int meticB = Integer.parseInt(tuplaB[1]);
+
+					if(ipA.equalsIgnoreCase(ipB)) {		
+						System.out.println(ipA+" "+ipB);
+						
+						if(meticA < meticB) {									
+						}else if(meticA > meticB) {
+												
+						}else {
+							
+						}
+					}
+						
+					
+
+
+				}			
+				
+			}
+			
+			System.out.println(completeTable.size());
+
+
+
+		}
+
 	}
 
-	public String get_tabela_string(){
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	public String get_tabela_string(){		
+
 		String tabela = "";
-		if(this.ipList.size() > 0) {
-			for(String x : ipList) {
-				tabela = tabela+"*"+x;			
-			}				
+
+		String tableSysout = "";
+
+		for(String x: completeTable) {
+			tableSysout = tableSysout+x+"\n";			
+		}
+
+		this.lastTable="  Routing Table\n"+tableSysout;
+
+		System.out.println(lastTable);
+
+
+		if(this.completeTable.size() > 0) {		
+			for(String x : completeTable) {
+				String[] ipWithMetric = x.split(";");			
+				String ip = ipWithMetric[0];
+				String metric = ipWithMetric[1];
+				tabela = tabela+"*"+ip+";"+metric;			
+			}	
+
 			return tabela;
 		} else {
 			return "!";
-
 		}		
+
 	}
+
 }

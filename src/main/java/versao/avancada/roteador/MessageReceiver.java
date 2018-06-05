@@ -40,12 +40,13 @@ public class MessageReceiver implements Runnable{
 				serverSocket.receive(receivePacket);
 
 				String tabela_string = new String( receivePacket.getData());            
-				String stringWithoutBlankSpace = tabela_string.trim();       
-				System.out.println();
+				String stringWithoutBlankSpace = tabela_string.trim();  
+				
+				String datagramHost = receivePacket.getAddress().getHostName();
 
 				sem.acquire();
 
-				tabela.updateTabela(stringWithoutBlankSpace);     
+				tabela.updateTabela(stringWithoutBlankSpace, datagramHost);     
 				sem.release();
 			} catch (Exception ex) {
 				JOptionPane.showMessageDialog(null,"Deu treta: "+ ex);
