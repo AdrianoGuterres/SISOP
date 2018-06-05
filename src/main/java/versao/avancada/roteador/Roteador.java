@@ -17,7 +17,7 @@ public class Roteador {
     public static void main(String[] args) throws IOException {
     	
     	Semaphore mutex = new Semaphore(1);
-    	String localHost = InetAddress.getLocalHost().getHostName();
+    	String localHost = InetAddress.getLocalHost().getHostAddress();
        
         ArrayList<String> routesNextDoor = new ArrayList<>();
         

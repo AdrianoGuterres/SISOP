@@ -81,20 +81,12 @@ public class TabelaRoteamento {
 
 				String ipA = tuplaA[0];
 				int meticA = Integer.parseInt(tuplaA[1]);
-				
-				System.out.println(completeTable.size());
-
 				for( j = i+1; j < aux-1; j++) {
 					String[] tuplaB = completeTable.get(j).split(";"); 
-					
-					System.out.println(i +"   "+j +"\n");
-
 					String ipB = tuplaB[0]; 
 					int meticB = Integer.parseInt(tuplaB[1]);
 
-					if(ipA.equalsIgnoreCase(ipB)) {		
-						System.out.println(ipA+" "+ipB);
-						
+					if(ipA.equalsIgnoreCase(ipB)) {								
 						if(meticA < meticB) {									
 						}else if(meticA > meticB) {
 												
@@ -102,20 +94,9 @@ public class TabelaRoteamento {
 							
 						}
 					}
-						
-					
-
-
-				}			
-				
+				}					
 			}
-			
-			System.out.println(completeTable.size());
-
-
-
 		}
-
 	}
 
 
