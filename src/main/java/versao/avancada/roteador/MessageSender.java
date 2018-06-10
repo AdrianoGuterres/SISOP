@@ -22,50 +22,55 @@ public class MessageSender implements Runnable{
 
 	@Override
 	public void run() {
+		int count = 0;
+
 		DatagramSocket clientSocket = null;
 		byte[] sendData;
 		InetAddress IPAddress = null;
+		
 
-		try {
-			clientSocket = new DatagramSocket();
-		} catch (SocketException ex) {
-			JOptionPane.showMessageDialog(null,"Deu treta: "+ ex);
-		}
-		
-		
+
 		while(true){
-			
 			try {
 				sem.acquire();
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-						
+
 			String tabela_string = tabela.get_tabela_string();
 			sem.release(); 
 
 			sendData = tabela_string.getBytes();
 
-			for (String ip : vizinhos){
-
+			int aux = 0;
+			while(aux < vizinhos.size()) {
 				try {
-					IPAddress = InetAddress.getByName(ip);
+					clientSocket = new DatagramSocket();
+					IPAddress = InetAddress.getByName(this.vizinhos.get(aux));
 					DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 5000);         
-					clientSocket.send(sendPacket);					
+					clientSocket.send(sendPacket);		
+					clientSocket.close();
 
 				} catch (Exception ex) {
 					JOptionPane.showMessageDialog(null,"Deu treta: "+ ex);
 				}
-				
-				}
-			if(tabela.isChanged()== false) {
-				try {
-					Thread.sleep(10000);
-				} catch (InterruptedException ex) {
-					JOptionPane.showMessageDialog(null,"Deu treta: "+ ex);
-				}
-			}
+
+				aux++;
+			}// fim do laço do envio para os vizinhos	
+			
+			goSleep();
+			
+		}//fim do loop		
+	}
+
+	public void goSleep() {
+
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException ex) {
+			JOptionPane.showMessageDialog(null,"Deu treta: "+ ex);
+
 		}
 	}
 }
