@@ -40,7 +40,7 @@ public class MessageSender implements Runnable{
 			
 			// Saindo da área critica do código
 
-			if(!neighborIPs.isEmpty()) {
+			if(table.getSizeNeighborActive() > 0) {
 				try {
 					sendData = tabela_string.getBytes();				
 					for (String x : neighborIPs) {
@@ -50,8 +50,14 @@ public class MessageSender implements Runnable{
 						DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 5000);  					     
 						clientSocket.send(sendPacket);		
 						clientSocket.close();	
-						Thread.sleep(1000);
+						
+						if(table.isChanged() == true) {
+							Thread.sleep(10000);														
+						}else {
+							Thread.sleep(30000);
+						}						
 					}
+					
 				} catch (Exception ex) {
 					JOptionPane.showMessageDialog(null,"Deu treta no sender com rota: "+ ex);
 				}				
@@ -63,6 +69,9 @@ public class MessageSender implements Runnable{
 					DatagramPacket sendPacket = new DatagramPacket(sendDataAux, 1024, 5000);         
 					clientSocket.send(sendPacket);		
 					clientSocket.close();
+					
+					Thread.sleep(10000);
+					
 				} catch (Exception ex) {
 					JOptionPane.showMessageDialog(null,"Deu treta no sender sem rota: "+ ex);
 				}

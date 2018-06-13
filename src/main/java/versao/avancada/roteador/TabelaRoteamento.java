@@ -117,7 +117,6 @@ public class TabelaRoteamento {
 			}
 		}
 
-
 		this.completeTable  = "";
 		this.mesageForSender = "";
 		if(destinationIpAndNeighborsIp.isEmpty() == false) {
@@ -126,13 +125,13 @@ public class TabelaRoteamento {
 				this.mesageForSender = this.mesageForSender+ "*"+x+";"+ destinationIpAndYourMetric.get(x);				
 			}			
 		}
-		this.lastTable = mesageForSender;
-
-
-		/*System.out.println(destinationIpAndNeighborsIp.keySet() +"    "+ destinationIpAndNeighborsIp.size());
-		System.out.println(destinationIpAndTimestamp.keySet()+"    "+ destinationIpAndTimestamp.size());
-		System.out.println(destinationIpAndYourMetric.keySet()  +"    "+ destinationIpAndYourMetric.size());*/
-
+		
+		if(lastTable.equalsIgnoreCase(mesageForSender)) {
+			wereChanged = true;
+		}else {
+			wereChanged = false;
+			this.lastTable = mesageForSender;
+		}		
 	}
 
 
@@ -163,6 +162,11 @@ public class TabelaRoteamento {
 
 		}
 		return forSend;
+	}
+	
+	
+	public int getSizeNeighborActive() {
+		return neighborRouters.size();
 	}
 
 }
