@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import javafx.scene.input.DataFormat;
+
 
 public class TabelaRoteamento {
 	private HashMap<String, String> destinyDoorAndExitDoor;
@@ -42,16 +44,20 @@ public class TabelaRoteamento {
 		for(String x: neighbor) {
 			destinyDoorAndExitDoor.put(x, x);
 			destinyDoorAndMetrik.put(x, 1);
-			//atualizaTime(x);
+			atualizaTime(x);
 			this.lastTable = lastTable +"*"+x+";1";
 			this.completeTable = completeTable + x +";"+1+";"+x+"\n";
 		}
 
 	}
 	
+	
+	
+	final Long actualTime = System.currentTimeMillis();
+	
 	private void atualizaTime(String destiny) {
-		Long actualTime = System.currentTimeMillis();
-		Long aux = actualTime+30000;				
+		
+		Long aux = actualTime+10000;				
 		destinyDoorAndTime.put(destiny,aux);		
 	}
 
@@ -59,7 +65,7 @@ public class TabelaRoteamento {
 		return areChanged;
 	}
 
-
+	DataFormat data = new DataFormat("mm:ss");
 
 	public void updateTabela(String receivedTable, String host){
 		
@@ -68,11 +74,23 @@ public class TabelaRoteamento {
 		if(receivedTable.equalsIgnoreCase("!")) {
 			this.areChanged = true;			
 		}else {
+			
 
 			for(int i =1; i< msgSplitedByAsterisk.length; i++) {
 				String[] stringTupla = msgSplitedByAsterisk[i].split(";");
 				String destinyDoor = stringTupla[0];			
 				int newMetrik = Integer.parseInt(stringTupla[1]);
+				
+				
+				long horaAtual = System.currentTimeMillis();
+				
+				if(destinyDoorAndTime.get(destinyDoor)-horaAtual < 0) {
+					destinyDoorAndTime.remove(destinyDoor);
+				}
+				
+				System.out.println("IP e labelTime  "+" " + horaAtual);
+				System.out.println("IP e labelTime "+destinyDoor+" " );
+				
 				if(destinyDoor.equalsIgnoreCase(localHost)== false) {
 					if(destinyDoorAndMetrik.containsKey(destinyDoor)) {
 						if(destinyDoorAndMetrik.get(destinyDoor) < newMetrik +1) {

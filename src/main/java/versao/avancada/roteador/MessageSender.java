@@ -67,7 +67,7 @@ public class MessageSender implements Runnable{
 	public void goSleep() {
 
 		try {
-			Thread.sleep(10000);
+			Thread.sleep(1000);
 		} catch (InterruptedException ex) {
 			JOptionPane.showMessageDialog(null,"Deu treta: "+ ex);
 
