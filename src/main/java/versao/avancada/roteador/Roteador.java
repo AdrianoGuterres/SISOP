@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,28 +20,25 @@ public class Roteador {
     	Semaphore mutex = new Semaphore(1);
     	String localHost = InetAddress.getLocalHost().getHostAddress();
        
-        ArrayList<String> routesNextDoor = new ArrayList<>();
+       final HashSet<String> neighborsSet = new HashSet<>();
         
         try ( BufferedReader inputFile = new BufferedReader(new FileReader("src/IPVizinhos.txt"))) {
             String ip;            
             while( (ip = inputFile.readLine()) != null){
-                routesNextDoor.add(ip);
+                neighborsSet.add(ip);
             }
             
         } catch (Exception ex) {
-        	JOptionPane.showMessageDialog(null,"Deu treta: "+ ex);
+        	JOptionPane.showMessageDialog(null,"Deu treta na leituras do arquivo: "+ ex);
             return;
         }        
       
-        TabelaRoteamento tabela = new TabelaRoteamento(routesNextDoor, localHost);        
+        TabelaRoteamento tabela = new TabelaRoteamento(neighborsSet, localHost);        
         Thread receiver = new Thread(new MessageReceiver(tabela, mutex));        
-        Thread sender = new Thread(new MessageSender(tabela, routesNextDoor, mutex));
+        Thread sender = new Thread(new MessageSender(tabela, neighborsSet, mutex));
         
-        receiver.start();
         sender.start();   
+        receiver.start();
         
-                 
-        
-    }
-    
+    }    
 }

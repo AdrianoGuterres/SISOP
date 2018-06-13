@@ -6,8 +6,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.concurrent.Semaphore;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
@@ -27,33 +25,35 @@ public class MessageReceiver implements Runnable{
 		try {
 			serverSocket = new DatagramSocket(5000);
 		} catch (SocketException ex) {
-			JOptionPane.showMessageDialog(null,"Deu treta: "+ ex);
+			JOptionPane.showMessageDialog(null,"Deu treta no socket do sender: "+ ex);
 			return;
 		}
 
 		byte[] receiveData = new byte[1024];
 
 		while(true){
-			DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+			DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);			
 
 			try {
 				serverSocket.receive(receivePacket);
+			} catch (IOException ex) {
+				JOptionPane.showMessageDialog(null,"Deu treta no server socket update do receiver: "+ ex);
+			}
 
-				String tabela_string = new String( receivePacket.getData());            
-				String stringWithoutBlankSpace = tabela_string.trim();  
-				
-				InetAddress datagramHost = receivePacket.getAddress();
-				String host = datagramHost.getHostAddress();
-				
+			String tabela_string = new String( receivePacket.getData());            
+			String stringWithoutBlankSpace = tabela_string.trim();  
 
+			InetAddress datagramHost = receivePacket.getAddress();
+			String host = datagramHost.getHostAddress();
+
+			try {
 				sem.acquire();
-
-				tabela.updateTabela(stringWithoutBlankSpace, host);     
-				sem.release();
 			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(null,"Deu treta: "+ ex);
+				JOptionPane.showMessageDialog(null,"Deu treta no aquairio update do receiver: "+ ex);
 			}  
 
+			tabela.updateTabela(stringWithoutBlankSpace, host);     
+			sem.release();
 		}
 	}
 

@@ -1,158 +1,168 @@
 package versao.avancada.roteador;
 
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-
-import javafx.scene.input.DataFormat;
+import java.util.Iterator;
 
 
 public class TabelaRoteamento {
-	private HashMap<String, String> destinyDoorAndExitDoor;
-	private HashMap<String, Integer> destinyDoorAndMetrik;
-	private HashMap<String, Long> destinyDoorAndTime;
-	
-	private String localHost;
-	private boolean areChanged;	
+	private HashMap<String, String> destinationIpAndNeighborsIp;
+	private HashMap<String, Integer> destinationIpAndYourMetric;
+	private HashMap<String, Long> destinationIpAndTimestamp;
+
+	private String localHost;		
 	private String lastTable;
 	private String completeTable;
-	
-	private ArrayList<String> neighborRouters;
-	
-	
+	private String mesageForSender;
+	private boolean wereChanged;
+	private long horaAtual;	
 
-	public TabelaRoteamento(ArrayList<String> neighbor, String localHost){
-		this.destinyDoorAndTime = new HashMap<>();
-		this.destinyDoorAndExitDoor = new HashMap<>();
-		this.destinyDoorAndMetrik = new HashMap<>();		
-		this.localHost = localHost;
-		this.neighborRouters = neighbor;		
+	private HashSet<String> neighborRouters;	
+	private HashSet<String> originalneighborRouters;
+	private Long actualTime = System.currentTimeMillis();
+
+
+	public TabelaRoteamento(HashSet<String> neighborList, String localHost){
+
+		this.destinationIpAndTimestamp = new HashMap<>();		
+		this.destinationIpAndNeighborsIp = new HashMap<>();		
+		this.destinationIpAndYourMetric = new HashMap<>();		
+		this.localHost = localHost;		
 		this.completeTable="";
 		this.lastTable = "";		
-		this.areChanged = false;
-		
-		start(neighbor);
+		this.mesageForSender = "!";
+		this.wereChanged = false;
+		this.neighborRouters = neighborList;	
+		this.originalneighborRouters = neighborList;		
+		start(neighborList);
 	}
-	
-	public void start(ArrayList<String> neighbor) {	
-		
+
+
+	public void start(HashSet<String> neighbor) {	
 		for(String x: neighbor) {
-			destinyDoorAndExitDoor.put(x, x);
-			destinyDoorAndMetrik.put(x, 1);
-			atualizaTime(x);
+			destinationIpAndNeighborsIp.put(x, x);					
+			destinationIpAndYourMetric.put(x, 1);	
+			destinationIpAndTimestamp.put(x, actualTime);
 			this.lastTable = lastTable +"*"+x+";1";
 			this.completeTable = completeTable + x +";"+1+";"+x+"\n";
 		}
-
-	}
-	
-	
-	
-	final Long actualTime = System.currentTimeMillis();
-	
-	private void atualizaTime(String destiny) {
-		
-		Long aux = actualTime+10000;				
-		destinyDoorAndTime.put(destiny,aux);		
 	}
 
 	public boolean isChanged() {
-		return areChanged;
+		return wereChanged;		
 	}
 
-	DataFormat data = new DataFormat("mm:ss");
-
-	public void updateTabela(String receivedTable, String host){
-		
-		String[] msgSplitedByAsterisk = receivedTable.split("\\*");
+	public void updateTabela(String receivedTable, String neighborIP){		
+		this.horaAtual = System.currentTimeMillis();
 
 		if(receivedTable.equalsIgnoreCase("!")) {
-			this.areChanged = true;			
+			this.wereChanged = true;	
+			if(originalneighborRouters.contains(neighborIP)) {
+				this.neighborRouters.add(neighborIP);				
+			}
 		}else {
-			
 
-			for(int i =1; i< msgSplitedByAsterisk.length; i++) {
-				String[] stringTupla = msgSplitedByAsterisk[i].split(";");
-				String destinyDoor = stringTupla[0];			
-				int newMetrik = Integer.parseInt(stringTupla[1]);
-				
-				
-				long horaAtual = System.currentTimeMillis();
-				
-				if(destinyDoorAndTime.get(destinyDoor)-horaAtual < 0) {
-					destinyDoorAndTime.remove(destinyDoor);
-				}
-				
-				System.out.println("IP e labelTime  "+" " + horaAtual);
-				System.out.println("IP e labelTime "+destinyDoor+" " );
-				
-				if(destinyDoor.equalsIgnoreCase(localHost)== false) {
-					if(destinyDoorAndMetrik.containsKey(destinyDoor)) {
-						if(destinyDoorAndMetrik.get(destinyDoor) < newMetrik +1) {
-							destinyDoorAndMetrik.put(destinyDoor, newMetrik +1);	
-							destinyDoorAndExitDoor.put(destinyDoor, host);
-							atualizaTime(destinyDoor);
-						}		
+			String[] splitedForAsterisk = receivedTable.split("\\*");
+			for(int i = 1; i < splitedForAsterisk.length; i ++) {
+				String[] tupla = splitedForAsterisk[i].split(";");
+				String ipReceived = tupla[0];
+				Integer metricReceived = Integer.parseInt(tupla[1]);
+
+				//verificar se não é os dos vizinhos 
+				if(neighborRouters.contains(ipReceived)== false && ipReceived.equalsIgnoreCase(localHost)==false) {		
+					ArrayList<String> ipList = new ArrayList<>();
+					for(String x:destinationIpAndNeighborsIp.keySet()) {
+						ipList.add(x);
+					}
+
+					//Verificar se já tenho o ip na lista de destinos
+					if(ipList.contains(ipReceived) == false) {
+						destinationIpAndNeighborsIp.put(ipReceived, neighborIP);
+						destinationIpAndYourMetric.put(ipReceived, metricReceived+1);
+						destinationIpAndTimestamp.put(ipReceived, actualTime);												
 					}else {
-						destinyDoorAndMetrik.put(destinyDoor, newMetrik +1);	
-						destinyDoorAndExitDoor.put(destinyDoor, host);
-						atualizaTime(destinyDoor);
-					}				
+						//verificar qual metrica é a menor
+						int metricaArmazenada = 0;
+						metricaArmazenada = destinationIpAndYourMetric.get(ipReceived);
+						if(metricReceived < metricaArmazenada) {
+							destinationIpAndYourMetric.put(ipReceived,metricReceived);
+							destinationIpAndNeighborsIp.put(ipReceived, neighborIP);
+							destinationIpAndTimestamp.put(ipReceived, actualTime);
+						}
+					}					
+				}	
+				if(neighborRouters.contains(ipReceived)) {
+					destinationIpAndYourMetric.put(ipReceived,1);
+					destinationIpAndNeighborsIp.put(ipReceived, ipReceived);
+					destinationIpAndTimestamp.put(ipReceived, actualTime);
 				}			
+			}			
+		}
+
+		long aux = System.currentTimeMillis();
+
+		Iterator<String> it = destinationIpAndTimestamp.keySet().iterator();
+
+		while(it.hasNext()) {
+			String key=it.next();
+
+			if(destinationIpAndTimestamp.get(key) + 3000 < aux) {
+				destinationIpAndNeighborsIp.remove(key);
+				destinationIpAndYourMetric.remove(key);
+				it.remove();
 			}
 		}
-		
-		Long aux = System.currentTimeMillis();		
-		for(String x: destinyDoorAndTime.keySet()) {
-			if(destinyDoorAndTime.get(x) < aux) {
-				destinyDoorAndExitDoor.remove(x);
-				destinyDoorAndMetrik.remove(x);
-				destinyDoorAndTime.remove(x);
+
+
+		this.completeTable  = "";
+		this.mesageForSender = "";
+		if(destinationIpAndNeighborsIp.isEmpty() == false) {
+			for(String x:destinationIpAndNeighborsIp.keySet()) {
+				this.completeTable = completeTable + x +" / "+destinationIpAndYourMetric.get(x)+" / "+destinationIpAndNeighborsIp.get(x)+"\n";
+				this.mesageForSender = this.mesageForSender+ "*"+x+";"+ destinationIpAndYourMetric.get(x);				
 			}			
-		}			
-		
-		String tableFormer = "";		
-		for(String x: destinyDoorAndExitDoor.keySet() ) {
-			tableFormer = tableFormer + "*"+x+";"+ destinyDoorAndMetrik.get(x);
 		}
-		
-		if(tableFormer.equalsIgnoreCase(lastTable)) {
-			this.areChanged = false;			
-		}else {
-			this.areChanged = true;
-			this.lastTable = tableFormer;
-		}
-		
-		this.completeTable = "";		
-		for(String x: destinyDoorAndExitDoor.keySet() ) {			
-			this.completeTable = completeTable+ x + " ; " + destinyDoorAndMetrik.get(x) + " ; " + destinyDoorAndExitDoor.get(x) + "\n";		
-		}			
+		this.lastTable = mesageForSender;
+
+
+		/*System.out.println(destinationIpAndNeighborsIp.keySet() +"    "+ destinationIpAndNeighborsIp.size());
+		System.out.println(destinationIpAndTimestamp.keySet()+"    "+ destinationIpAndTimestamp.size());
+		System.out.println(destinationIpAndYourMetric.keySet()  +"    "+ destinationIpAndYourMetric.size());*/
+
 	}
-	
-	private int count = 0;
+
+
 
 	public String get_tabela_string(){		
 		DateFormat formato = new SimpleDateFormat("HH:mm:ss");
 		Date date = new Date();
 		String formattedDate = formato.format(date);
-		
+
 		String forSend = "!";		
-		if(count < 1){
-			count ++;
+		if(destinationIpAndNeighborsIp.size()==0){
 			forSend = "!";			
-			System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\nMessage sending for Routers Neighbors: " + forSend);		
-			System.out.println("\n  Routing Table \n" + completeTable +formattedDate+"\n\n");
-		   
+			System.out.println("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");	
+			System.out.println("Message sending for Routers Neighbors: ");	
+			System.out.println(forSend);	
+			System.out.println("\n          Routing Table \n-------------/--/---------------");
+			System.out.println(formattedDate);
+			System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
+
 		}else {						
-			forSend = lastTable;			
-			System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\nMessage sending for Routers Neighbors: " + forSend);			
-			System.out.println("\n  Routing Table \n" + completeTable+formattedDate+"\n\n");	
+			forSend = mesageForSender;			
+			System.out.println("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");	
+			System.out.println("Message sending for Routers Neighbors: ");	
+			System.out.println(forSend);	
+			System.out.println("\n          Routing Table \n"+completeTable);
+			System.out.println(formattedDate);
+			System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
+
 		}
 		return forSend;
 	}
+
 }

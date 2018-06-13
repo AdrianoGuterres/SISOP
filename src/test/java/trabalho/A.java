@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import org.junit.Test;
 
@@ -15,7 +16,7 @@ public class A {
 	@Test
 	public void test() {
 		
-		ArrayList<String> routersNextDoor = new ArrayList<>();
+		HashSet<String> routersNextDoor = new HashSet<>();
 		
 		routersNextDoor.add("1.1.1.1");
 		routersNextDoor.add("1.1.1.2");

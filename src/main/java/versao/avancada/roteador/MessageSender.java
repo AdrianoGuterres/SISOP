@@ -3,74 +3,70 @@ package versao.avancada.roteador;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.concurrent.Semaphore;
 
 import javax.swing.JOptionPane;
 
 public class MessageSender implements Runnable{
-	private TabelaRoteamento tabela; 
-	private ArrayList<String> vizinhos; 
+	private TabelaRoteamento table; 
+	private HashSet<String> neighborIPs; 
 	private Semaphore sem;
 
-	public MessageSender(TabelaRoteamento table, ArrayList<String> routersNextDoor, Semaphore sem){
-		this.tabela = table;
-		this.vizinhos = routersNextDoor;
+	public MessageSender(TabelaRoteamento table, HashSet<String> neighborIPs, Semaphore sem){
+		this.table = table;
+		this.neighborIPs = neighborIPs;
 		this.sem = sem;
 	}
 
 	@Override
 	public void run() {
-		int count = 0;
-
+		
 		DatagramSocket clientSocket = null;
-		byte[] sendData;
+		byte[] sendData = new byte[1024];
 		InetAddress IPAddress = null;
 		
-
-
 		while(true){
+			
+			// Entrando na área critica do código
 			try {
 				sem.acquire();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (InterruptedException ex) {
+				JOptionPane.showMessageDialog(null,"Deu treta acquire do sender: "+ ex);
 			}
 
-			String tabela_string = tabela.get_tabela_string();
+			String tabela_string = table.get_tabela_string();
 			sem.release(); 
+			
+			// Saindo da área critica do código
 
-			sendData = tabela_string.getBytes();
-
-			int aux = 0;
-			while(aux < vizinhos.size()) {
+			if(!neighborIPs.isEmpty()) {
 				try {
+					sendData = tabela_string.getBytes();				
+					for (String x : neighborIPs) {
+						clientSocket = new DatagramSocket();
+						IPAddress = InetAddress.getByName(x);					
+						
+						DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 5000);  					     
+						clientSocket.send(sendPacket);		
+						clientSocket.close();	
+						Thread.sleep(1000);
+					}
+				} catch (Exception ex) {
+					JOptionPane.showMessageDialog(null,"Deu treta no sender com rota: "+ ex);
+				}				
+
+			}else {
+				try {
+					byte[] sendDataAux = ("!").getBytes();
 					clientSocket = new DatagramSocket();
-					IPAddress = InetAddress.getByName(this.vizinhos.get(aux));
-					DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 5000);         
+					DatagramPacket sendPacket = new DatagramPacket(sendDataAux, 1024, 5000);         
 					clientSocket.send(sendPacket);		
 					clientSocket.close();
-
 				} catch (Exception ex) {
-					JOptionPane.showMessageDialog(null,"Deu treta: "+ ex);
+					JOptionPane.showMessageDialog(null,"Deu treta no sender sem rota: "+ ex);
 				}
-
-				aux++;
-			}// fim do laço do envio para os vizinhos	
-			
-			goSleep();
-			
-		}//fim do loop		
-	}
-
-	public void goSleep() {
-
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException ex) {
-			JOptionPane.showMessageDialog(null,"Deu treta: "+ ex);
-
+			}
 		}
 	}
 }
