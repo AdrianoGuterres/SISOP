@@ -7,49 +7,46 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 
 public class TabelaRoteamento {
-	private HashMap<String, String> destinationIpAndNeighborsIp;
-	private HashMap<String, Integer> destinationIpAndYourMetric;
-	private HashMap<String, Long> destinationIpAndTimestamp;
+	private HashMap<String, String> mapa;
+	private ArrayList<String> neighborRouters ;
+	private ArrayList<String> originalneighborRouters;
 
-	private String localHost;		
-	private String lastTable;
-	private String completeTable;
-	private String mesageForSender;
-	private boolean wereChanged;
-	private long horaAtual;	
+	boolean wereChanged;
 
-	private HashSet<String> neighborRouters;	
-	private HashSet<String> originalneighborRouters;
-	private Long actualTime = System.currentTimeMillis();
+	String localHost;
+	String tabelaRoteamento;
+	String tabelaRoteamentoAntiga;
+	String tabelaRoteamentoVisao;
+
+	public TabelaRoteamento(ArrayList<String> neighborList, String localHost){
+		mapa = new HashMap<>();
+
+		wereChanged = false;
+		tabelaRoteamento = "";
 
 
-	public TabelaRoteamento(HashSet<String> neighborList, String localHost){
-
-		this.destinationIpAndTimestamp = new HashMap<>();		
-		this.destinationIpAndNeighborsIp = new HashMap<>();		
-		this.destinationIpAndYourMetric = new HashMap<>();		
 		this.localHost = localHost;		
-		this.completeTable="";
-		this.lastTable = "";		
-		this.mesageForSender = "!";
-		this.wereChanged = false;
 		this.neighborRouters = neighborList;	
 		this.originalneighborRouters = neighborList;		
 		start(neighborList);
 	}
 
+	// Ip destino || metrica || ip de saida || timestamp
+	public void start(ArrayList<String> neighbor) {	
+		long time = System.currentTimeMillis();
 
-	public void start(HashSet<String> neighbor) {	
 		for(String x: neighbor) {
-			destinationIpAndNeighborsIp.put(x, x);					
-			destinationIpAndYourMetric.put(x, 1);	
-			destinationIpAndTimestamp.put(x, actualTime);
-			this.lastTable = lastTable +"*"+x+";1";
-			this.completeTable = completeTable + x +";"+1+";"+x+"\n";
+			mapa.put(x, "1|"+ 1+"|"+time);
+			tabelaRoteamento = tabelaRoteamento +"*"+ x+";" +1;
+			tabelaRoteamentoVisao = tabelaRoteamentoVisao+"\n"+x+"|"+1+"|"+x+time;	
 		}
+
+		tabelaRoteamentoAntiga = tabelaRoteamento;
 	}
 
 	public boolean isChanged() {
@@ -57,82 +54,52 @@ public class TabelaRoteamento {
 	}
 
 	public void updateTabela(String receivedTable, String neighborIP){		
-		this.horaAtual = System.currentTimeMillis();
+		long time = System.currentTimeMillis();
 
-		if(receivedTable.equalsIgnoreCase("!")) {
-			this.wereChanged = true;	
-			if(originalneighborRouters.contains(neighborIP)) {
-				this.neighborRouters.add(neighborIP);				
-			}
-		}else {
+		HashMap<String, String> mapaAux = new HashMap<>();
+		mapaAux = mapa;
 
-			String[] splitedForAsterisk = receivedTable.split("\\*");
-			for(int i = 1; i < splitedForAsterisk.length; i ++) {
-				String[] tupla = splitedForAsterisk[i].split(";");
-				String ipReceived = tupla[0];
-				Integer metricReceived = Integer.parseInt(tupla[1]);
-
-				//verificar se não é os dos vizinhos 
-				if(neighborRouters.contains(ipReceived)== false && ipReceived.equalsIgnoreCase(localHost)==false) {		
-					ArrayList<String> ipList = new ArrayList<>();
-					for(String x:destinationIpAndNeighborsIp.keySet()) {
-						ipList.add(x);
-					}
-
-					//Verificar se já tenho o ip na lista de destinos
-					if(ipList.contains(ipReceived) == false) {
-						destinationIpAndNeighborsIp.put(ipReceived, neighborIP);
-						destinationIpAndYourMetric.put(ipReceived, metricReceived+1);
-						destinationIpAndTimestamp.put(ipReceived, actualTime);												
-					}else {
-						//verificar qual metrica é a menor
-						int metricaArmazenada = 0;
-						metricaArmazenada = destinationIpAndYourMetric.get(ipReceived);
-						if(metricReceived < metricaArmazenada) {
-							destinationIpAndYourMetric.put(ipReceived,metricReceived);
-							destinationIpAndNeighborsIp.put(ipReceived, neighborIP);
-							destinationIpAndTimestamp.put(ipReceived, actualTime);
-						}
-					}					
-				}	
-				if(neighborRouters.contains(ipReceived)) {
-					destinationIpAndYourMetric.put(ipReceived,1);
-					destinationIpAndNeighborsIp.put(ipReceived, ipReceived);
-					destinationIpAndTimestamp.put(ipReceived, actualTime);
-				}			
-			}			
-		}
-
-		long aux = System.currentTimeMillis();
-
-		Iterator<String> it = destinationIpAndTimestamp.keySet().iterator();
-
-		while(it.hasNext()) {
-			String key=it.next();
-
-			if(destinationIpAndTimestamp.get(key) + 3000 < aux) {
-				destinationIpAndNeighborsIp.remove(key);
-				destinationIpAndYourMetric.remove(key);
-				it.remove();
-			}
-		}
-
-		this.completeTable  = "";
-		this.mesageForSender = "";
-		if(destinationIpAndNeighborsIp.isEmpty() == false) {
-			for(String x:destinationIpAndNeighborsIp.keySet()) {
-				this.completeTable = completeTable + x +" / "+destinationIpAndYourMetric.get(x)+" / "+destinationIpAndNeighborsIp.get(x)+"\n";
-				this.mesageForSender = this.mesageForSender+ "*"+x+";"+ destinationIpAndYourMetric.get(x);				
-			}			
-		}
-		
-		if(lastTable.equalsIgnoreCase(mesageForSender)) {
+		if(receivedTable.contains("!")) {
 			wereChanged = true;
+			if(originalneighborRouters.contains(neighborIP)) {
+				mapa.put(neighborIP, "1|"+ neighborIP+"|"+time);
+			}			
 		}else {
-			wereChanged = false;
-			this.lastTable = mesageForSender;
-		}		
+			String[] msgSplitedByAsterisk = receivedTable.split("\\*");
+			for(int i =1; i< msgSplitedByAsterisk.length; i++) {
+				String[] stringTupla = msgSplitedByAsterisk[i].split(";");
+				String ipReceived = stringTupla[0];	
+				int metricReceived = Integer.parseInt(stringTupla[1]);	
+
+
+				if(mapa.containsKey(ipReceived)== false) {
+					mapa.put(ipReceived, (metricReceived+1)+"|"+ localHost+"|"+ time);					
+				}else {
+
+					for(String x:mapaAux.keySet()) {					
+						String[] tupla = mapaAux.get(x).split("|");
+						String ipDestino = x;
+						int metrica = Integer.parseInt(tupla[1]);
+						String saida = tupla[2];
+						String timestamp= tupla[3];
+
+						if(metricReceived < metrica) {
+							mapa.put(x, (metricReceived+1)+"|"+ localHost+"|"+ time);
+
+						}else {
+							mapa.put(x, metrica+"|"+ localHost+"|"+ time);
+						}						
+					}									
+				}				
+			}			
+		}
+
+		tabelaRoteamentoAntiga = tabelaRoteamento;
+
+		tabelaRoteamento = "";
+
 	}
+
 
 
 
@@ -141,30 +108,50 @@ public class TabelaRoteamento {
 		Date date = new Date();
 		String formattedDate = formato.format(date);
 
+		HashMap< String, String> mapaAux = new HashMap<>(); 		
+		mapaAux = mapa;
+
+		String tabelaRoteamentoVisao = "";
+
+		int count = 0;
+
+
+
+		for(String x:mapa.keySet()) {
+			String[] tupla = mapaAux.get(x).split("|");
+			String ipDestino = x;
+			String metrica = tupla[1];
+			String saida = tupla[2];		
+					
+		}
+
+
+
 		String forSend = "!";		
-		if(destinationIpAndNeighborsIp.size()==0){
+		if(mapa.size()==0){
 			forSend = "!";			
 			System.out.println("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");	
 			System.out.println("Message sending for Routers Neighbors: ");	
 			System.out.println(forSend);	
-			System.out.println("\n          Routing Table \n-------------/--/---------------");
+			System.out.println("\n    Routing Table \n-------------/--/---------------");
 			System.out.println(formattedDate);
 			System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
 
 		}else {						
-			forSend = mesageForSender;			
+			forSend = tabelaRoteamento;			
 			System.out.println("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");	
 			System.out.println("Message sending for Routers Neighbors: ");	
 			System.out.println(forSend);	
-			System.out.println("\n          Routing Table \n"+completeTable);
+			System.out.println("\n    Routing Table \n"+tabelaRoteamentoVisao);
 			System.out.println(formattedDate);
 			System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
 
 		}
 		return forSend;
+
 	}
-	
-	
+
+
 	public int getSizeNeighborActive() {
 		return neighborRouters.size();
 	}

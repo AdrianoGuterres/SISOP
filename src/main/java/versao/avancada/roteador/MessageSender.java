@@ -3,6 +3,7 @@ package versao.avancada.roteador;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.Semaphore;
 
@@ -10,10 +11,10 @@ import javax.swing.JOptionPane;
 
 public class MessageSender implements Runnable{
 	private TabelaRoteamento table; 
-	private HashSet<String> neighborIPs; 
+	private ArrayList<String> neighborIPs; 
 	private Semaphore sem;
 
-	public MessageSender(TabelaRoteamento table, HashSet<String> neighborIPs, Semaphore sem){
+	public MessageSender(TabelaRoteamento table, ArrayList<String> neighborIPs, Semaphore sem){
 		this.table = table;
 		this.neighborIPs = neighborIPs;
 		this.sem = sem;
@@ -52,9 +53,9 @@ public class MessageSender implements Runnable{
 						clientSocket.close();	
 						
 						if(table.isChanged() == true) {
-							Thread.sleep(10000);														
+							Thread.sleep(100);														
 						}else {
-							Thread.sleep(30000);
+							Thread.sleep(300);
 						}						
 					}
 					

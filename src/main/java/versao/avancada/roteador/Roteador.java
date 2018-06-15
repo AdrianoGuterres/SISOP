@@ -20,7 +20,7 @@ public class Roteador {
     	Semaphore mutex = new Semaphore(1);
     	String localHost = InetAddress.getLocalHost().getHostAddress();
        
-       final HashSet<String> neighborsSet = new HashSet<>();
+       final ArrayList<String> neighborsSet = new ArrayList<>();
         
         try ( BufferedReader inputFile = new BufferedReader(new FileReader("src/IPVizinhos.txt"))) {
             String ip;            

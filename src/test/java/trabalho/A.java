@@ -16,11 +16,11 @@ public class A {
 	@Test
 	public void test() {
 		
-		HashSet<String> routersNextDoor = new HashSet<>();
+		ArrayList<String> routersNextDoor = new ArrayList<>();
 		
 		routersNextDoor.add("1.1.1.1");
 		routersNextDoor.add("1.1.1.2");
-		routersNextDoor.add("1.1.1.3");
+		routersNextDoor.add("192.168.15.6");
 		
 		String localHost = "";
 		
@@ -55,6 +55,12 @@ public class A {
 		String update4 = "*a;1*b;1*c;1*a;1*b;1*c;1";
 		tabela.updateTabela(update4,datagramHost);
 		tabela.get_tabela_string();
+		
+		tabela.updateTabela("!",datagramHost);
+		tabela.get_tabela_string();
+		
+		
+		
 
 	}
 
