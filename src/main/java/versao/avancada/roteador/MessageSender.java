@@ -47,16 +47,14 @@ public class MessageSender implements Runnable{
 						clientSocket = new DatagramSocket();
 						IPAddress = InetAddress.getByName(x);					
 						
-						DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 5001);  					     
+						DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 5000);  					     
 						clientSocket.send(sendPacket);		
 						clientSocket.close();	
 						
 						if(table.isChanged() == true) {
-							System.out.println(table.getSizeNeighborActive()+"la"+table.getSizeNeighborActive());
-							Thread.sleep(1000);														
+							Thread.sleep(10000);														
 						}else {
-							System.out.println(table.getSizeNeighborActive()+"lalala");
-							Thread.sleep(3000);
+							Thread.sleep(30000);
 						}						
 					}
 					
@@ -66,8 +64,6 @@ public class MessageSender implements Runnable{
 
 			}else {
 				try {
-					
-					System.out.println("entrou aqui");
 					byte[] sendDataAux = ("!").getBytes();
 					clientSocket = new DatagramSocket();
 					DatagramPacket sendPacket = new DatagramPacket(sendDataAux, 1024, 5000);         

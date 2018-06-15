@@ -33,7 +33,7 @@ public class Roteador {
             return;
         }        
       
-        TabelaRoteamento tabela = new TabelaRoteamento(neighborsSet);        
+        TabelaRoteamento tabela = new TabelaRoteamento(neighborsSet, localHost);        
         Thread receiver = new Thread(new MessageReceiver(tabela, mutex));        
         Thread sender = new Thread(new MessageSender(tabela, neighborsSet, mutex));
         
