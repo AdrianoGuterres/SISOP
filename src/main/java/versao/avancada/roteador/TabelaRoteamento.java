@@ -1,5 +1,7 @@
 package versao.avancada.roteador;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,7 +16,7 @@ public class TabelaRoteamento {
 	private HashMap<String, Integer> destinationIpAndYourMetric;
 	private HashMap<String, Long> destinationIpAndTimestamp;
 
-	private String localHost;		
+
 	private String lastTable;
 	private String completeTable;
 	private String mesageForSender;
@@ -26,12 +28,11 @@ public class TabelaRoteamento {
 	private Long actualTime = System.currentTimeMillis();
 
 
-	public TabelaRoteamento(HashSet<String> neighborList, String localHost){
+	public TabelaRoteamento(HashSet<String> neighborList){
 
 		this.destinationIpAndTimestamp = new HashMap<>();		
 		this.destinationIpAndNeighborsIp = new HashMap<>();		
-		this.destinationIpAndYourMetric = new HashMap<>();		
-		this.localHost = localHost;		
+		this.destinationIpAndYourMetric = new HashMap<>();			
 		this.completeTable="";
 		this.lastTable = "";		
 		this.mesageForSender = "!";
@@ -56,84 +57,55 @@ public class TabelaRoteamento {
 		return wereChanged;		
 	}
 
-	public void updateTabela(String receivedTable, String neighborIP){		
-		this.horaAtual = System.currentTimeMillis();
+	public void updateTabela(String receivedTable, String neighborIP){	
+		
+		
 
-		if(receivedTable.equalsIgnoreCase("!")) {
-			this.wereChanged = true;	
-			if(originalneighborRouters.contains(neighborIP)) {
-				this.neighborRouters.add(neighborIP);				
+		System.out.println(destinationIpAndNeighborsIp.size());
+		System.out.println(destinationIpAndTimestamp.size());
+		System.out.println(destinationIpAndYourMetric.size());
+	}
+	
+	public void verificaEntrada(String mensagem) {
+		if(mensagem.contains("!")== false) {
+			
+			String[] msgSplitedByAsterisk = mensagem.split("\\*");
+			for(int i =1; i< msgSplitedByAsterisk.length; i++) {
+				String[] stringTupla = msgSplitedByAsterisk[i].split(";");
+				String destinyDoor = stringTupla[0];			
+				int newMetrik = Integer.parseInt(stringTupla[1]);
 			}
+			
 		}else {
-
-			String[] splitedForAsterisk = receivedTable.split("\\*");
-			for(int i = 1; i < splitedForAsterisk.length; i ++) {
-				String[] tupla = splitedForAsterisk[i].split(";");
-				String ipReceived = tupla[0];
-				Integer metricReceived = Integer.parseInt(tupla[1]);
-
-				//verificar se não é os dos vizinhos 
-				if(neighborRouters.contains(ipReceived)== false && ipReceived.equalsIgnoreCase(localHost)==false) {		
-					ArrayList<String> ipList = new ArrayList<>();
-					for(String x:destinationIpAndNeighborsIp.keySet()) {
-						ipList.add(x);
-					}
-
-					//Verificar se já tenho o ip na lista de destinos
-					if(ipList.contains(ipReceived) == false) {
-						destinationIpAndNeighborsIp.put(ipReceived, neighborIP);
-						destinationIpAndYourMetric.put(ipReceived, metricReceived+1);
-						destinationIpAndTimestamp.put(ipReceived, actualTime);												
-					}else {
-						//verificar qual metrica é a menor
-						int metricaArmazenada = 0;
-						metricaArmazenada = destinationIpAndYourMetric.get(ipReceived);
-						if(metricReceived < metricaArmazenada) {
-							destinationIpAndYourMetric.put(ipReceived,metricReceived);
-							destinationIpAndNeighborsIp.put(ipReceived, neighborIP);
-							destinationIpAndTimestamp.put(ipReceived, actualTime);
-						}
-					}					
-				}	
-				if(neighborRouters.contains(ipReceived)) {
-					destinationIpAndYourMetric.put(ipReceived,1);
-					destinationIpAndNeighborsIp.put(ipReceived, ipReceived);
-					destinationIpAndTimestamp.put(ipReceived, actualTime);
-				}			
-			}			
-		}
-
-		long aux = System.currentTimeMillis();
-
-		Iterator<String> it = destinationIpAndTimestamp.keySet().iterator();
-
-		while(it.hasNext()) {
-			String key=it.next();
-
-			if(destinationIpAndTimestamp.get(key) + 3000 < aux) {
-				destinationIpAndNeighborsIp.remove(key);
-				destinationIpAndYourMetric.remove(key);
-				it.remove();
-			}
-		}
-
-		this.completeTable  = "";
-		this.mesageForSender = "";
-		if(destinationIpAndNeighborsIp.isEmpty() == false) {
-			for(String x:destinationIpAndNeighborsIp.keySet()) {
-				this.completeTable = completeTable + x +" / "+destinationIpAndYourMetric.get(x)+" / "+destinationIpAndNeighborsIp.get(x)+"\n";
-				this.mesageForSender = this.mesageForSender+ "*"+x+";"+ destinationIpAndYourMetric.get(x);				
-			}			
+			wereChanged = true;
 		}
 		
-		if(lastTable.equalsIgnoreCase(mesageForSender)) {
-			wereChanged = true;
-		}else {
-			wereChanged = false;
-			this.lastTable = mesageForSender;
-		}		
+	}
+	
+	public void verificaHost(String ipRecebido) {
+		String aux = "";
+		try { aux = InetAddress.getLocalHost().getHostAddress(); } catch (UnknownHostException e) { }
+		
+		if(ipRecebido.equalsIgnoreCase(aux)) {
+			verificaVizinho(ipRecebido);
+		}
+		
 	}
 
+
+
+	private void verificaVizinho(String ipRecebido) {
+		if(neighborRouters.contains(ipRecebido)== false) {
+			verificaTabela(ipRecebido, ipSender);			
+		}		
+	}
+	
+	public void verificaTabela(String ipRecebido, String ipSender) {
+		if(destinationIpAndNeighborsIp.containsKey(ipRecebido)) {
+			destinationIpAndNeighborsIp.put(ipRecebido, ipSender);
+			e
+		}
+	}
 
 
 	public String get_tabela_string(){		
@@ -163,10 +135,22 @@ public class TabelaRoteamento {
 		}
 		return forSend;
 	}
-	
-	
+
+
 	public int getSizeNeighborActive() {
 		return neighborRouters.size();
 	}
+
+	public String verificaIpEntradaRede(String tabelaRecebida) {
+
+		if(tabelaRecebida.contains("!")) {
+			wereChanged = true;		
+			return "";
+		}else{
+			return tabelaRecebida;
+		}		
+	}
+
+	
 
 }
