@@ -16,51 +16,55 @@ public class A {
 	@Test
 	public void test() {
 		
-		ArrayList<String> routersNextDoor = new ArrayList<>();
+		String localHost = "192.168.15.6";
 		
-		routersNextDoor.add("1.1.1.1");
-		routersNextDoor.add("1.1.1.2");
-		routersNextDoor.add("192.168.15.6");
+		String vizinho1 = "aaa.168.15.6";
+		String vizinho2 = "bbb.168.15.6";
+		String vizinho3 = "ccc.168.15.6";
 		
-		String localHost = "";
+		String destino1 = "192.168.15.aaa"; 
+		String destino2 = "192.168.15.bbb"; 
+		String destino3 = "192.168.15.ccc"; 
+		String destino4 = "192.168.15.ddd"; 
+		String destino5 = "192.168.15.eee"; 
+		String destino6 = "192.168.15.fff"; 
+		String destino7 = "192.168.15.ggg"; 
+		String destino8 = "192.168.15.hhh"; 
+		String destino9 = "192.168.15.iii"; 
+		String destino10 = "192.168.15.jjj"; 
+		String destino11 = "192.168.15.kkk";
 		
+		ArrayList<String> listaVizinhos = new ArrayList<>();
+		listaVizinhos.add(vizinho1);
+		listaVizinhos.add(vizinho2);
+		listaVizinhos.add(vizinho3);
 		
-		try {
-			localHost = InetAddress.getLocalHost().getHostName();
-		} catch (UnknownHostException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		ArrayList<String> datagramas = new ArrayList<>();
+		datagramas.add("*"+vizinho3+";1*"+destino2+";1*"+destino3+";1*");
+		
+		datagramas.add("*"+destino4+";1*"+destino5+";1*"+destino6+";1*");
+		
+		datagramas.add("*"+destino1+";1*"+destino2+";1*"+vizinho2+";1*");
+		
+		datagramas.add("*"+destino7+";1*"+destino8+";1*"+destino9+";1*");
+		
+		datagramas.add("*"+destino10+";1*"+vizinho1+";1*"+destino9+";1*");		
+		
+
+		TabelaRoteamento tabela = new TabelaRoteamento(listaVizinhos, localHost);
+		
+		for(String x: datagramas) {
+			
+			tabela.updateTabela(x, vizinho1);
+			tabela.updateTabela(x, vizinho2);
+			tabela.updateTabela(x, vizinho3);
+			
+			System.err.println(tabela.get_tabela_string());
+			
 		}
-		
-		String datagramHost = "1.1.1.3";
-		
-		try {localHost = InetAddress.getLocalHost().getHostAddress();} catch (UnknownHostException e) {}
-		
-		TabelaRoteamento tabela = new TabelaRoteamento(routersNextDoor, localHost);
-		
-		
-		
-		String update = "*e;1*f;1*g;1*h;1*i;1*"+localHost+";1";
-		tabela.updateTabela(update,datagramHost);
-		tabela.get_tabela_string();
-		
-		String update2 = "*a;1*b;1*c;1*a;1*b;1*c;1";
-		tabela.updateTabela(update2,datagramHost);
-		tabela.get_tabela_string();
-		
-		String update3 = "*a;1*b;1*c;1*a;1*b;1*c;1";
-		tabela.updateTabela(update3,datagramHost);
-		tabela.get_tabela_string();
-		
-		String update4 = "*a;1*b;1*c;1*a;1*b;1*c;1";
-		tabela.updateTabela(update4,datagramHost);
-		tabela.get_tabela_string();
-		
-		tabela.updateTabela("!",datagramHost);
-		tabela.get_tabela_string();
-		
-		
-		
+
+
+
 
 	}
 
