@@ -16,6 +16,7 @@ public class MessageSender implements Runnable{
 
 	public MessageSender(TabelaRoteamento table, ArrayList<String> neighborIPs, Semaphore sem){
 		this.table = table;
+		this.neighborIPs = new ArrayList<>();
 		this.neighborIPs = neighborIPs;
 		this.sem = sem;
 	}
@@ -24,7 +25,7 @@ public class MessageSender implements Runnable{
 	public void run() {
 		
 		DatagramSocket clientSocket = null;
-		byte[] sendData = new byte[1024];
+		byte[] sendData;
 		InetAddress IPAddress = null;
 		
 		while(true){
@@ -41,7 +42,7 @@ public class MessageSender implements Runnable{
 			
 			// Saindo da área critica do código
 
-			if(table.getSizeNeighborActive() > 0) {
+			System.out.println(neighborIPs);
 				try {
 					sendData = tabela_string.getBytes();				
 					for (String x : neighborIPs) {
@@ -62,21 +63,8 @@ public class MessageSender implements Runnable{
 				} catch (Exception ex) {
 					JOptionPane.showMessageDialog(null,"Deu treta no sender com rota: "+ ex);
 				}				
+				
 
-			}else {
-				try {
-					byte[] sendDataAux = ("!").getBytes();
-					clientSocket = new DatagramSocket();
-					DatagramPacket sendPacket = new DatagramPacket(sendDataAux, 1024, 5000);         
-					clientSocket.send(sendPacket);		
-					clientSocket.close();
-					
-					Thread.sleep(10000);
-					
-				} catch (Exception ex) {
-					JOptionPane.showMessageDialog(null,"Deu treta no sender sem rota: "+ ex);
-				}
-			}
 		}
 	}
 }

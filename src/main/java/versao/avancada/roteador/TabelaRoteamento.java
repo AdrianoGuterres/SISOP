@@ -1,5 +1,7 @@
 package versao.avancada.roteador;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -12,94 +14,119 @@ import java.util.Set;
 
 
 public class TabelaRoteamento {
-	private HashMap<String, String> mapa;
-	private ArrayList<String> neighborRouters ;
-	private ArrayList<String> originalneighborRouters;
 
-	boolean wereChanged;
-
-	String localHost;
-	String tabelaRoteamento;
-	String tabelaRoteamentoAntiga;
-	String tabelaRoteamentoVisao;
+	private ArrayList<Tupla> listaTuplas;
+	private boolean wereChanged;
+	private ArrayList<String> listaVizinhos;
 
 	public TabelaRoteamento(ArrayList<String> neighborList, String localHost){
-		mapa = new HashMap<>();
+		listaTuplas = new ArrayList<>();
+		listaVizinhos = neighborList;
 
-		wereChanged = false;
-		tabelaRoteamento = "";
-
-
-		this.localHost = localHost;		
-		this.neighborRouters = neighborList;	
-		this.originalneighborRouters = neighborList;		
-		start(neighborList);
-	}
-
-	// Ip destino || metrica || ip de saida || timestamp
-	public void start(ArrayList<String> neighbor) {	
-		long time = System.currentTimeMillis();
-
-		for(String x: neighbor) {
-			mapa.put(x, "1|"+ 1+"|"+time);
-			tabelaRoteamento = tabelaRoteamento +"*"+ x+";" +1;
-			tabelaRoteamentoVisao = tabelaRoteamentoVisao+"\n"+x+"|"+1+"|"+x+time;	
-		}
-
-		tabelaRoteamentoAntiga = tabelaRoteamento;
 	}
 
 	public boolean isChanged() {
 		return wereChanged;		
 	}
 
-	public void updateTabela(String receivedTable, String neighborIP){		
-		long time = System.currentTimeMillis();
 
-		HashMap<String, String> mapaAux = new HashMap<>();
-		mapaAux = mapa;
+	//-------------------------------------------------------------------------------------
+	public void updateTabela(String receivedTable, String neighborIP){		
+		String localHost = "";
+		try {
+			localHost = InetAddress.getLocalHost().getHostAddress();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		long time = System.currentTimeMillis();
 
 		if(receivedTable.contains("!")) {
 			wereChanged = true;
-			if(originalneighborRouters.contains(neighborIP)) {
-				mapa.put(neighborIP, "1|"+ neighborIP+"|"+time);
-			}			
+
 		}else {
-			String[] msgSplitedByAsterisk = receivedTable.split("\\*");
-			for(int i =1; i< msgSplitedByAsterisk.length; i++) {
-				String[] stringTupla = msgSplitedByAsterisk[i].split(";");
-				String ipReceived = stringTupla[0];	
-				int metricReceived = Integer.parseInt(stringTupla[1]);	
+			String[] aux = receivedTable.split("\\*");
 
+			for(int i = 1; i < aux.length; i++) {			
+				String tuplaString = aux[i];
+				listaTuplas.add(new Tupla(tuplaString, neighborIP));	
+			}	
+		}
 
-				if(mapa.containsKey(ipReceived)== false) {
-					mapa.put(ipReceived, (metricReceived+1)+"|"+ localHost+"|"+ time);					
-				}else {
-
-					for(String x:mapaAux.keySet()) {					
-						String[] tupla = mapaAux.get(x).split("|");
-						String ipDestino = x;
-						int metrica = Integer.parseInt(tupla[1]);
-						String saida = tupla[2];
-						String timestamp= tupla[3];
-
-						if(metricReceived < metrica) {
-							mapa.put(x, (metricReceived+1)+"|"+ localHost+"|"+ time);
-
-						}else {
-							mapa.put(x, metrica+"|"+ localHost+"|"+ time);
-						}						
-					}									
-				}				
+		for(int i =0; i < listaTuplas.size(); i++) {			
+			if(listaVizinhos.contains(listaTuplas.get(i).getDestino())) {
+				listaTuplas.remove(i);								
 			}			
 		}
 
-		tabelaRoteamentoAntiga = tabelaRoteamento;
+		for(int i =0; i < listaTuplas.size(); i++) {			
+			if(listaTuplas.get(i).getDestino().contentEquals(localHost)) {
+				listaTuplas.remove(i);								
+			}			
+		}
 
-		tabelaRoteamento = "";
+		for(int i =0; i < listaTuplas.size(); i++) {
+			String destino = listaTuplas.get(i).getDestino();
+			int metrica = listaTuplas.get(i).getMetrica();
+			String saida = listaTuplas.get(i).getSaida();
+			long timeStamp = listaTuplas.get(i).getTimeStamp();
 
-	}
+			for(int j = i ; j < listaTuplas.size(); j++) {
 
+				if(listaTuplas.get(j).getMetrica() > metrica) {
+					listaTuplas.remove(j);					
+				}				
+			}						
+		}
+
+		for(int i =0; i < listaTuplas.size(); i++) {
+			String destino = listaTuplas.get(i).getDestino();
+			int metrica = listaTuplas.get(i).getMetrica();
+			String saida = listaTuplas.get(i).getSaida();
+			long timeStamp = listaTuplas.get(i).getTimeStamp();
+
+			for(int j = i ; j < listaTuplas.size(); j++) {
+
+				if(listaTuplas.get(j).getMetrica() > metrica) {
+					listaTuplas.remove(j);					
+				}				
+			}						
+		}
+
+		for(int i =0; i < listaTuplas.size(); i++) {
+			String destino = listaTuplas.get(i).getDestino();
+			int metrica = listaTuplas.get(i).getMetrica();
+			String saida = listaTuplas.get(i).getSaida();
+			long timeStamp = listaTuplas.get(i).getTimeStamp();
+
+			for(int j = i ; j < listaTuplas.size(); j++) {
+
+				if(listaTuplas.get(j).getTimeStamp()+30000 < time) {
+					listaTuplas.remove(j);					
+				}				
+			}						
+		}
+
+		for(int i =0; i < listaTuplas.size(); i++) {
+			String destino = listaTuplas.get(i).getDestino();
+			int metrica = listaTuplas.get(i).getMetrica();
+			String saida = listaTuplas.get(i).getSaida();
+			long timeStamp = listaTuplas.get(i).getTimeStamp();
+
+			for(int j = i ; j < listaTuplas.size(); j++) {
+
+				if(listaTuplas.get(j).getDestino().contentEquals(destino)) {
+					listaTuplas.remove(j);					
+				}				
+			}						
+		}
+
+
+
+
+
+	}		
 
 
 
@@ -108,44 +135,44 @@ public class TabelaRoteamento {
 		Date date = new Date();
 		String formattedDate = formato.format(date);
 
-		HashMap< String, String> mapaAux = new HashMap<>(); 		
-		mapaAux = mapa;
+		String aux ="";
+		String aux2 = "";
 
-		String tabelaRoteamentoVisao = "";
+		for(int i =0; i < listaTuplas.size(); i++) {
+			String destino = listaTuplas.get(i).getDestino();
+			int metrica = listaTuplas.get(i).getMetrica();
+			String saida = listaTuplas.get(i).getSaida();
+			long timeStamp = listaTuplas.get(i).getTimeStamp();
 
-		int count = 0;
+			aux = aux+"|"+destino+"|"+metrica+"|"+saida+"\n";
+			aux2 = "*"+destino+";"+metrica;
 
-
-
-		for(String x:mapa.keySet()) {
-			String[] tupla = mapaAux.get(x).split("|");
-			String ipDestino = x;
-			String metrica = tupla[1];
-			String saida = tupla[2];		
-					
 		}
 
 
+		String send= "";
+
 
 		String forSend = "!";		
-		if(mapa.size()==0){
+		if(listaTuplas.size()==0){
 			forSend = "!";			
 			System.out.println("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");	
 			System.out.println("Message sending for Routers Neighbors: ");	
 			System.out.println(forSend);	
 			System.out.println("\n    Routing Table \n-------------/--/---------------");
-			System.out.println(formattedDate);
+			System.out.println(aux);
 			System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
+			forSend = "!";
 
-		}else {						
-			forSend = tabelaRoteamento;			
+		}else {				
 			System.out.println("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");	
 			System.out.println("Message sending for Routers Neighbors: ");	
 			System.out.println(forSend);	
-			System.out.println("\n    Routing Table \n"+tabelaRoteamentoVisao);
-			System.out.println(formattedDate);
+			System.out.println("\n    Routing Table \n"+aux2);
+			System.out.println(aux);
 			System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
 
+			forSend = aux2;
 		}
 		return forSend;
 
@@ -153,7 +180,7 @@ public class TabelaRoteamento {
 
 
 	public int getSizeNeighborActive() {
-		return neighborRouters.size();
+		return 0;//neighborRouters.size();
 	}
 
 }
