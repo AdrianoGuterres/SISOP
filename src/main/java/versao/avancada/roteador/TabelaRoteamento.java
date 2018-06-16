@@ -23,6 +23,10 @@ public class TabelaRoteamento {
 		listaTuplas = new ArrayList<>();
 		listaVizinhos = neighborList;
 
+		for(String x:neighborList) {
+			listaTuplas.add(new Tupla(x+";1",x,listaVizinhos));
+		}
+
 	}
 
 	public boolean isChanged() {
@@ -31,34 +35,92 @@ public class TabelaRoteamento {
 
 
 	//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	public void updateTabela(String receivedTable, String neighborIP){		
+	public void updateTabela(String receivedTable, String neighborIP){	
+
 		String localHost = "";
-		try {
-			localHost = InetAddress.getLocalHost().getHostAddress();
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		try {localHost = InetAddress.getLocalHost().getHostAddress();} catch (UnknownHostException e) {}
 
 		long time = System.currentTimeMillis();
 
-		if(receivedTable.contains("!")) {
-			wereChanged = true;
+
+		//verifica se é entrada de rota
+		if(receivedTable.contains("!")== false) {
+
+			//Preenche a tabela com tudo
+			if(receivedTable.contains("!")) {
+				wereChanged = true;
+
+			}else {
+				String[] aux = receivedTable.split("\\*");
+
+				for(int i = 1; i < aux.length; i++) {			
+					String tuplaString = aux[i];
+					listaTuplas.add(new Tupla(tuplaString, neighborIP, listaVizinhos));	
+				}	
+			}
+
+			// Verifica se o destino é eu mesmo
+			for(Tupla x: listaTuplas) {				
+				if(x.getDestino().equalsIgnoreCase(localHost)) {
+					x.setForRemove(true);					
+				}				
+			}
+
+			// Verifica se o destino é eu mesmo
+			for(Tupla x: listaTuplas) {				
+				if(x.getDestino().equalsIgnoreCase(localHost)) {
+					x.setForRemove(true);					
+				}				
+			}
+			
+			
+			//verifica os destinos duplicados e marca pela metrica
+			for(int i= 0; i< listaTuplas.size(); i++) {
+				for(int j= i+1; j < listaTuplas.size()-1; j++) {					
+					if(listaTuplas.get(i).getDestino().equalsIgnoreCase(listaTuplas.get(j).getDestino())) {
+						if(listaTuplas.get(i).getMetrica() <= listaTuplas.get(j).getMetrica()) {
+							listaTuplas.get(j).setForRemove(true);																					
+						}												
+					}
+				}
+			}
+			
+			for(Tupla x:listaTuplas) {
+				if(x.getTimeStamp()+30000 < time) {			
+					x.setForRemove(true);
+				}				
+				
+				//System.out.println("TimeStamp: "+x.getTimeStamp() +"  time actual: "+time);
+			}
+			
+			
+			for(int i = 1; i < listaTuplas.size(); i++) {
+				if(listaTuplas.get(i).isForRemove()) {
+					listaTuplas.remove(i);					
+				}				
+			}
+						
 
 		}else {
-			String[] aux = receivedTable.split("\\*");
-
-			for(int i = 1; i < aux.length; i++) {			
-				String tuplaString = aux[i];
-				listaTuplas.add(new Tupla(tuplaString, neighborIP, listaVizinhos));	
-			}	
+			wereChanged = true;
 		}
 
-				
-		
+
+
+
+
+
+
+
+
+
+
+
+
+
 	}		
 
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 	public String get_tabela_string(){		
 		DateFormat formato = new SimpleDateFormat("HH:mm:ss");
@@ -91,7 +153,7 @@ public class TabelaRoteamento {
 			System.out.println("--------------------------------------------");
 			System.out.println(formattedDate); 
 			System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
-		
+
 		}else {				
 			System.out.println("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 			System.out.println("Message sending for Routers Neighbors: ");	
