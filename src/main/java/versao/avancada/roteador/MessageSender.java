@@ -4,17 +4,15 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.concurrent.Semaphore;
-
 import javax.swing.JOptionPane;
 
 public class MessageSender implements Runnable{
-	private TabelaRoteamento table; 
+	private RoutingTable table; 
 	private ArrayList<String> neighborIPs; 
 	private Semaphore sem;
 
-	public MessageSender(TabelaRoteamento table, ArrayList<String> neighborIPs, Semaphore sem){
+	public MessageSender(RoutingTable table, ArrayList<String> neighborIPs, Semaphore sem){
 		this.table = table;
 		this.neighborIPs = new ArrayList<>();
 		this.neighborIPs = neighborIPs;
@@ -33,16 +31,14 @@ public class MessageSender implements Runnable{
 			// Entrando na área critica do código
 			try {
 				sem.acquire();
-			} catch (InterruptedException ex) {
-				JOptionPane.showMessageDialog(null,"Deu treta acquire do sender: "+ ex);
+			} catch (InterruptedException ex) { 
+				JOptionPane.showMessageDialog(null,"The table update coultn't be loaded : "+ ex);
 			}
 
 			String tabela_string = table.get_tabela_string();
 			sem.release(); 
 			
 			// Saindo da área critica do código
-
-			System.out.println(neighborIPs);
 				try {
 					sendData = tabela_string.getBytes();				
 					for (String x : neighborIPs) {
@@ -54,14 +50,14 @@ public class MessageSender implements Runnable{
 						clientSocket.close();	
 						
 						if(table.isChanged() == true) {
-							Thread.sleep(100);														
+							Thread.sleep(10000);		
 						}else {
-							Thread.sleep(300);
+							Thread.sleep(30000);
 						}						
 					}
 					
 				} catch (Exception ex) {
-					JOptionPane.showMessageDialog(null,"Deu treta no sender com rota: "+ ex);
+					JOptionPane.showMessageDialog(null,"The datagram couldn't be sent: "+ ex);
 				}				
 				
 

@@ -6,18 +6,18 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.concurrent.Semaphore;
-
 import javax.swing.JOptionPane;
 
 public class MessageReceiver implements Runnable{
-	private TabelaRoteamento tabela;
+	private RoutingTable table;
 	private Semaphore sem;
 
-	public MessageReceiver(TabelaRoteamento t, Semaphore sem){
-		this.tabela = t;
+	public MessageReceiver(RoutingTable t, Semaphore sem){
+		this.table = t;
 		this.sem = sem;
 	}
 
+	@SuppressWarnings("resource")
 	@Override
 	public void run() {
 		DatagramSocket serverSocket = null;
@@ -25,7 +25,7 @@ public class MessageReceiver implements Runnable{
 		try {
 			serverSocket = new DatagramSocket(5000);
 		} catch (SocketException ex) {
-			JOptionPane.showMessageDialog(null,"Deu treta no socket do sender: "+ ex);
+			JOptionPane.showMessageDialog(null,"The datagram couldn't be initialized: "+ ex);
 			return;
 		}
 
@@ -37,7 +37,7 @@ public class MessageReceiver implements Runnable{
 			try {
 				serverSocket.receive(receivePacket);
 			} catch (IOException ex) {
-				JOptionPane.showMessageDialog(null,"Deu treta no server socket update do receiver: "+ ex);
+				JOptionPane.showMessageDialog(null,"The socket couldn't be initialized: "+ ex);
 			}
 
 			String tabela_string = new String( receivePacket.getData());            
@@ -45,15 +45,17 @@ public class MessageReceiver implements Runnable{
 
 			InetAddress datagramHost = receivePacket.getAddress();
 			String host = datagramHost.getHostAddress();
-
+			
+			//Entrando na área crítica
 			try {
 				sem.acquire();
 			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(null,"Deu treta no aquairio update do receiver: "+ ex);
+				JOptionPane.showMessageDialog(null,"The table update coultn't be sended : "+ ex);
 			}  
 
-			tabela.updateTabela(stringWithoutBlankSpace, host);     
+			table.updateTabela(stringWithoutBlankSpace, host);     
 			sem.release();
+			//Saindo da área crítica
 		}
 	}
 

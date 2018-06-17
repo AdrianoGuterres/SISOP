@@ -9,9 +9,9 @@ import java.util.HashSet;
 
 import org.junit.Test;
 
-import versao.avancada.roteador.TabelaRoteamento;
+import versao.avancada.roteador.RoutingTable;
 
-public class A {
+public class RoutingTableTest {
 
 	@Test
 	public void test() {
@@ -26,7 +26,7 @@ public class A {
 		String destino2 = "192.168.15.bbb"; 
 		String destino3 = "192.168.15.ccc"; 
 		String destino4 = "192.168.15.ddd"; 
-		String destino5 = "192.168.15.eee"; 
+		String destino5 = "192.168.15.eee";  
 		String destino6 = "192.168.15.fff"; 
 		String destino7 = "192.168.15.ggg"; 
 		String destino8 = "192.168.15.hhh"; 
@@ -51,20 +51,24 @@ public class A {
 		datagramas.add("*"+destino10+";1*"+vizinho1+";1*"+destino9+";1*");		
 		
 
-		TabelaRoteamento tabela = new TabelaRoteamento(listaVizinhos, localHost);
+		RoutingTable tabela = new RoutingTable(listaVizinhos, localHost);
 		
-		for(String x: datagramas) {
-			
-			tabela.updateTabela(x, vizinho1);
-			tabela.updateTabela(x, vizinho2);
-			tabela.updateTabela(x, vizinho3);
-			
-			System.err.println(tabela.get_tabela_string());
+		int count = 0;		
+		while (count != 3000000) {
+			for(String x: datagramas) { 
+				
+				tabela.updateTabela(x, vizinho1);
+				System.out.println(tabela.get_tabela_string());
+				tabela.updateTabela(x, vizinho2);
+				System.out.println(tabela.get_tabela_string());
+				tabela.updateTabela(x, vizinho3);			
+			}
 			
 		}
+		
+		
 
-
-
+		
 
 	}
 

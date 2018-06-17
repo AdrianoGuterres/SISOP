@@ -1,44 +1,40 @@
 package versao.avancada.roteador;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.concurrent.Semaphore;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.JOptionPane;
 
-public class Roteador {
+public class Router {
 
     public static void main(String[] args) throws IOException {
     	
     	Semaphore mutex = new Semaphore(1);
+    	
     	String localHost = InetAddress.getLocalHost().getHostAddress();
        
-       final ArrayList<String> neighborsSet = new ArrayList<>();
+       final ArrayList<String> neighborsList = new ArrayList<>();
         
         try ( BufferedReader inputFile = new BufferedReader(new FileReader("src/IPVizinhos.txt"))) {
             String ip;            
             while( (ip = inputFile.readLine()) != null){
-                neighborsSet.add(ip);
+                neighborsList.add(ip);
             }
             
         } catch (Exception ex) {
-        	JOptionPane.showMessageDialog(null,"Deu treta na leituras do arquivo: "+ ex);
+        	JOptionPane.showMessageDialog(null,"An error was thrown vhile reading the file: "+ ex);
             return;
         }        
       
-        TabelaRoteamento tabela = new TabelaRoteamento(neighborsSet, localHost);        
-        Thread receiver = new Thread(new MessageReceiver(tabela, mutex));        
-        Thread sender = new Thread(new MessageSender(tabela, neighborsSet, mutex));
-        
-        sender.start();   
+        RoutingTable table = new RoutingTable(neighborsList, localHost);         
+        Thread receiver = new Thread(new MessageReceiver(table, mutex));        
+        Thread sender = new Thread(new MessageSender(table, neighborsList, mutex));        
+          
         receiver.start();
+        sender.start(); 
         
     }    
 }
