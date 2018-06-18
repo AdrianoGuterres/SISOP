@@ -62,7 +62,7 @@ public class RoutingTable {
 				}
 			}	
 			
-			this.manager.verifyTimestamp();					
+			this.manager.verifyTimestamp();			 		
 			
 			String lastTableSendedTemp ="";			
 			for(Tuple x:manager.getTuplasList()) {
