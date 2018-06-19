@@ -30,20 +30,15 @@ public class TuplesManager {
 
 		long timestamp = new Long(System.currentTimeMillis());
 
-		//atualiza ou adiciona o vizinho				
-
-		if(destinyReveived.equalsIgnoreCase(localHost)==false) {
-			if(updateTupla(ipSender, 1, ipSender) == false) {	
-				tuplasList.add(new Tuple(ipSender,1, ipSender, timestamp));
-				//atualiza ou adiciona a rota
-
-				if(updateTupla(destinyReveived, metric, ipSender) == false) {	
-					tuplasList.add(new Tuple(destinyReveived,metric+1, ipSender, timestamp));							
-				}
+		//atualiza o vizinho	
+		if(updateTupla(ipSender, 1, ipSender)) {
+			
+			if(updateTupla(destinyReveived, metric, ipSender)==false) {
+				tuplasList.add(new Tuple(destinyReveived, metric+1, ipSender, timestamp));			
 			}
-		}else {
-			updateTupla(ipSender, 1, ipSender);	
 		}
+
+		
 	}		
 
 	public ArrayList<Tuple> getTuplasList() {
