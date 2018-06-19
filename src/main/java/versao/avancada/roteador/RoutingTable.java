@@ -1,5 +1,6 @@
 package versao.avancada.roteador;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
@@ -9,21 +10,23 @@ import java.util.Date;
 
 public class RoutingTable {
 
-	private boolean wereChanged;
-	
-	private ArrayList<String> neigtborList = new ArrayList<>();
-
-	private String lastTableSended;
-
-	private ArrayList<String> neigtborListAux = new ArrayList<>();
-	 
 	private TuplesManager manager;
 	
-	public RoutingTable(ArrayList<String> neighborList, String localHost){
+	private ArrayList<String> neigtborList;
+	private ArrayList<String> neigtborListAux;
+
+	private String lastTableSended;
+	private String localHost;
+	
+	private boolean wereChanged;	
+	
+	public RoutingTable(ArrayList<String> neighborList, String localHost) throws IOException{
+		this.neigtborList = new ArrayList<>(neighborList);
+		this.neigtborListAux = new ArrayList<>(neigtborList);		
 		
-		try {InetAddress.getLocalHost().getHostAddress();} catch (UnknownHostException e) {e.printStackTrace();}
+		this.manager = new TuplesManager(neighborList);				
 		
-		this.manager = new TuplesManager(neighborList);
+		this.localHost = InetAddress.getLocalHost().getHostAddress();
 
 		lastTableSended = "";
 
@@ -40,7 +43,8 @@ public class RoutingTable {
 
 	//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	public void updateTabela(String receivedTable, String neighborIP){	
-		//verifica se é entrada de rota
+		
+		//verifica se é entrada de rede
 		if(receivedTable.contains("!")) {
 			wereChanged = true;
 			if(neigtborList.contains(neighborIP)) {
@@ -54,14 +58,16 @@ public class RoutingTable {
 
 			for(int i = 1; i < aux.length; i++) {			
 				String tuplaString[] = aux[i].split(";");
+				
 				String newDestiny = tuplaString[0];
 				int newMetric = Integer.parseInt(tuplaString[1]);
 				
-				if(neigtborList.contains(newDestiny)== false) {
+				if((neigtborList.contains(newDestiny)== false) && (newDestiny.equalsIgnoreCase(this.localHost)== false)) {
 					this.manager.addTuple(newDestiny, newMetric+1, neighborIP);										
 				}
 			}	
 			
+						
 			this.manager.verifyTimestamp();			 		
 			
 			String lastTableSendedTemp ="";			

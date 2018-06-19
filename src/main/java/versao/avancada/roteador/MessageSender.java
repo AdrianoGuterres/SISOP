@@ -52,7 +52,7 @@ public class MessageSender implements Runnable{
 						if(table.isChanged() == true) {
 							Thread.sleep(10000);		
 						}else {
-							Thread.sleep(30000);
+							Thread.sleep(20000);
 						}						
 					}
 					

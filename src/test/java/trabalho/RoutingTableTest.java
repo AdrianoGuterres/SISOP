@@ -1,5 +1,6 @@
 package trabalho;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.plaf.SliderUI;
@@ -11,7 +12,7 @@ import versao.avancada.roteador.RoutingTable;
 public class RoutingTableTest {
 
 	@Test
-	public void test() throws InterruptedException {
+	public void test() throws InterruptedException, IOException {
 		
 		String localHost = "192.168.15.6";
 		
