@@ -68,6 +68,8 @@ public class TuplesManager {
 	}	
 
 	public boolean updateTupla(String newDestiny, int metric, String ipSender) {
+		
+		
 		boolean aux = false;
 		try {
 			long newTimestamp = System.currentTimeMillis();
@@ -78,9 +80,11 @@ public class TuplesManager {
 						tuplasList.get(i).setIpOut(ipSender);
 						tuplasList.get(i).setTimeStamp(newTimestamp);
 						tuplasList.get(i).setMetric(metric);							
+					}else {
+						aux = true;	
+						tuplasList.get(i).setTimeStamp(newTimestamp);						
 					}			
-					aux = true;	
-					tuplasList.get(i).setTimeStamp(newTimestamp);
+					
 				}
 			}
 			sem.release();
