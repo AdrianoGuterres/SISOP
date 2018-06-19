@@ -110,16 +110,13 @@ public class RoutingTable {
 			}else {
 				wereChanged = true;
 				this.lastTableSended = lastTableSendedTemp;
-			}			
-			
-			
-			
+			}						
 
 			DateFormat formato = new SimpleDateFormat("HH:mm:ss");
 			Date date = new Date();
 			String formattedDate = formato.format(date);
 
-			if((neigtborList.size() == 0) || (count ==0)){
+			if((neigtborList.size() == 0) || lastTableSended.length() == 0){
 				System.out.println("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 				System.out.println("Message sending for Routers Neighbors: ");	
 				System.out.println( "!");	
