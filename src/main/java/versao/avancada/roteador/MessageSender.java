@@ -50,9 +50,9 @@ public class MessageSender implements Runnable{
 						clientSocket.close();	
 						
 						if(table.isChanged() == true) {
-							Thread.sleep(1000);		
+							Thread.sleep(15000);		
 						}else {
-							Thread.sleep(2000);
+							Thread.sleep(25000);
 						}						
 					}
 					
