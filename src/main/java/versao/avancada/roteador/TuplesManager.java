@@ -29,16 +29,11 @@ public class TuplesManager {
 	public void addTuple(String destinyReveived, int metric, String ipSender) {		
 
 		long timestamp = new Long(System.currentTimeMillis());
-
-		//atualiza o vizinho	
-		if(updateTupla(ipSender, 1, ipSender)) {
-			
-			if(updateTupla(destinyReveived, metric, ipSender)==false) {
-				tuplasList.add(new Tuple(destinyReveived, metric+1, ipSender, timestamp));			
-			}
+		
+		if(updateTupla(destinyReveived, metric, ipSender)==false) {
+			tuplasList.add(new Tuple(destinyReveived, metric+1, ipSender, timestamp));			
 		}
 
-		
 	}		
 
 	public ArrayList<Tuple> getTuplasList() {
@@ -59,7 +54,7 @@ public class TuplesManager {
 		sem.release();
 	}	
 
-	private void updateTimestampNeibor(String ipSender) {	
+	public void updateTimestampNeibor(String ipSender) {	
 		try {
 			sem.acquire();
 			long timeStamp = System.currentTimeMillis();
@@ -72,7 +67,7 @@ public class TuplesManager {
 		} catch (InterruptedException e) {}		
 	}	
 
-	private boolean updateTupla(String newDestiny, int metric, String ipSender) {
+	public boolean updateTupla(String newDestiny, int metric, String ipSender) {
 		boolean aux = false;
 		try {
 			long newTimestamp = System.currentTimeMillis();

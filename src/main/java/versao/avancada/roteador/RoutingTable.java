@@ -15,7 +15,6 @@ public class RoutingTable {
 
 	private ArrayList<String> neigtborList;
 	private ArrayList<String> neigtborListAux;
-
 	private String lastTableSended;
 	private String localHost;
 
@@ -25,20 +24,23 @@ public class RoutingTable {
 
 	public RoutingTable(ArrayList<String> neighborList, String localHost) throws IOException{
 		this.neigtborList = new ArrayList<>(neighborList);
-		this.neigtborListAux = new ArrayList<>(neigtborList);		
+		this.neigtborListAux = new ArrayList<>(neigtborList);
 
 		this.manager = new TuplesManager(neighborList);				
 
 		this.localHost = InetAddress.getLocalHost().getHostAddress();
-
-		lastTableSended = "";
-
 		this.sem = new Semaphore(1);
+		
+		this.lastTableSended = "";
 
 		for(String x:neighborList) {
-			manager.addTuple(x, 1, x);
-			neigtborList.add(x);
-			neigtborListAux.add(x);
+			this.manager.addTuple(x, 1, x);
+			this.neigtborList.add(x);
+			this.neigtborListAux.add(x);
+			
+			this.manager.addTuple(x, 1, x);
+			
+			System.out.println(lastTableSended);
 		}
 	}
 
@@ -49,6 +51,7 @@ public class RoutingTable {
 	//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	public void updateTabela(String receivedTable, String neighborIP){	
 		
+		this.manager.updateTupla(neighborIP, 1, neighborIP);
 
 		try {
 			this.sem.acquire();
@@ -74,14 +77,11 @@ public class RoutingTable {
 
 						for(int j = 0; j < neigtborList.size(); j++) {
 
-							if(neigtborList.get(j).equalsIgnoreCase(newDestiny)==false) {
+							if(neigtborList.get(j).equalsIgnoreCase(localHost)==false) {
 								this.manager.addTuple(newDestiny, newMetric, neighborIP);								
-							
 						}
 					}
-
-				}		
-
+				}	
 			}
 
 		} catch (InterruptedException e) {}
@@ -115,8 +115,9 @@ public class RoutingTable {
 			DateFormat formato = new SimpleDateFormat("HH:mm:ss");
 			Date date = new Date();
 			String formattedDate = formato.format(date);
+			
 
-			if((neigtborList.size() == 0) || lastTableSended.length() == 0){
+			if((neigtborList.size() == 0) || count == 0){
 				System.out.println("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 				System.out.println("Message sending for Routers Neighbors: ");	
 				System.out.println( "!");	
@@ -151,9 +152,12 @@ public class RoutingTable {
 				System.out.println(formattedDate); 
 				System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
 			}	
+			
+			
 
 		} catch (InterruptedException e) {}
 		sem.release();
+		count ++;
 
 		return lastTableSended;
 	}
