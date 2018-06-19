@@ -20,28 +20,29 @@ public class TuplesManager {
 		this.sem = new Semaphore(1);
 		this.tuplasList = new ArrayList<Tuple>();
 	}
-	
-	
-	
-	
-	
+
+
+
+
+
 
 	public void addTuple(String destinyReveived, int metric, String ipSender) {		
-		
+
 		long timestamp = new Long(System.currentTimeMillis());
-		
+
 		//atualiza ou adiciona o vizinho				
-		
+
 		if(destinyReveived.equalsIgnoreCase(localHost)==false) {
 			if(updateTupla(ipSender, 1, ipSender) == false) {	
 				tuplasList.add(new Tuple(ipSender,1, ipSender, timestamp));
 				//atualiza ou adiciona a rota
-				
-					if(updateTupla(destinyReveived, metric, ipSender) == false) {	
-						tuplasList.add(new Tuple(destinyReveived,metric+1, ipSender, timestamp));			
-					
+
+				if(updateTupla(destinyReveived, metric, ipSender) == false) {	
+					tuplasList.add(new Tuple(destinyReveived,metric+1, ipSender, timestamp));							
 				}
 			}
+		}else {
+			tuplasList.add(new Tuple(ipSender,1, ipSender, timestamp));			
 		}
 	}		
 

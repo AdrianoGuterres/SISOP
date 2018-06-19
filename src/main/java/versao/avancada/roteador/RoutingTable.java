@@ -70,13 +70,13 @@ public class RoutingTable {
 					String newDestiny = tuplaString[0];
 
 					int newMetric = Integer.parseInt(tuplaString[1]);
-					if(newDestiny.equalsIgnoreCase(localHost)==false) {
+					
 
 						for(int j = 0; j < neigtborList.size(); j++) {
 
 							if(neigtborList.get(j).equalsIgnoreCase(newDestiny)==false) {
 								this.manager.addTuple(newDestiny, newMetric, neighborIP);								
-							}
+							
 						}
 					}
 
