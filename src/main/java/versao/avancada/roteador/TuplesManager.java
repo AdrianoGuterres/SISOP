@@ -42,7 +42,7 @@ public class TuplesManager {
 				}
 			}
 		}else {
-			tuplasList.add(new Tuple(ipSender,1, ipSender, timestamp));			
+			updateTupla(ipSender, 1, ipSender);	
 		}
 	}		
 
