@@ -20,17 +20,29 @@ public class TuplesManager {
 		this.sem = new Semaphore(1);
 		this.tuplasList = new ArrayList<Tuple>();
 	}
+	
+	
+	
+	
+	
 
 	public void addTuple(String destinyReveived, int metric, String ipSender) {		
-
-
+		
+		long timestamp = new Long(System.currentTimeMillis());
+		
+		//atualiza ou adiciona o vizinho				
+		
 		if(destinyReveived.equalsIgnoreCase(localHost)==false) {
-			if(updateTupla(destinyReveived, metric, ipSender) == false) {	
-				tuplasList.add(new Tuple(destinyReveived, metric, ipSender));			
+			if(updateTupla(ipSender, 1, ipSender) == false) {	
+				tuplasList.add(new Tuple(ipSender,1, ipSender, timestamp));
+				//atualiza ou adiciona a rota
+				
+					if(updateTupla(destinyReveived, metric, ipSender) == false) {	
+						tuplasList.add(new Tuple(destinyReveived,metric+1, ipSender, timestamp));			
+					
+				}
 			}
-
 		}
-		updateTimestampNeibor(ipSender);	
 	}		
 
 	public ArrayList<Tuple> getTuplasList() {
@@ -44,14 +56,14 @@ public class TuplesManager {
 			long actualTime = System.currentTimeMillis();			
 			for(int i = 0; i< tuplasList.size(); i++) {
 				if((tuplasList.get(i).getTimeStamp()+30000) < actualTime) {
-					tuplasList.get(i).isForRemove();								
+					tuplasList.remove(i);								
 				}			
 			}
 		} catch (InterruptedException e) {}
 		sem.release();
 	}	
 
-	private void updateTimestampNeibor(String ipSender) {
+	private void updateTimestampNeibor(String ipSender) {	
 		try {
 			sem.acquire();
 			long timeStamp = System.currentTimeMillis();
@@ -68,10 +80,10 @@ public class TuplesManager {
 		boolean aux = false;
 		try {
 			long newTimestamp = System.currentTimeMillis();
+			sem.acquire();
 			for(int i = 0; i< tuplasList.size(); i++) {
 				if(tuplasList.get(i).getIpDestiny().equalsIgnoreCase(newDestiny)) {
-					if(tuplasList.get(i).getMetric()> metric) {
-						sem.acquire();
+					if(tuplasList.get(i).getMetric()> metric) {						
 						tuplasList.get(i).setIpOut(ipSender);
 						tuplasList.get(i).setTimeStamp(newTimestamp);
 						tuplasList.get(i).setMetric(metric);							

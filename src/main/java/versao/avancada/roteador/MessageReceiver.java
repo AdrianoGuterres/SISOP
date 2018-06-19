@@ -42,6 +42,8 @@ public class MessageReceiver implements Runnable{
 
 			String tabela_string = new String( receivePacket.getData());            
 			String stringWithoutBlankSpace = tabela_string.trim();  
+			
+			System.out.println("recebido :"+ tabela_string);
 
 			InetAddress datagramHost = receivePacket.getAddress();
 			String host = datagramHost.getHostAddress();
