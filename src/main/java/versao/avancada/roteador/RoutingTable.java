@@ -70,7 +70,7 @@ public class RoutingTable {
 					String newDestiny = tuplaString[0];
 
 					int newMetric = Integer.parseInt(tuplaString[1]);
-					if(newDestiny.equalsIgnoreCase(localHost)) {
+					if(newDestiny.equalsIgnoreCase(localHost)==false) {
 
 						for(int j = 0; j < neigtborList.size(); j++) {
 
