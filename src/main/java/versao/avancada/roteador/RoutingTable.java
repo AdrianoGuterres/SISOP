@@ -48,6 +48,7 @@ public class RoutingTable {
 
 	//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	public void updateTabela(String receivedTable, String neighborIP){	
+		String lastTableSendedTemp ="";	
 
 		try {
 			this.sem.acquire();
@@ -59,9 +60,9 @@ public class RoutingTable {
 					neigtborListAux.add(neighborIP);			
 					manager.addTuple(neighborIP, 1, neighborIP);
 				}
+				System.out.println(lastTableSendedTemp.equalsIgnoreCase(lastTableSended));
 
 			}else {
-
 				String[] aux = receivedTable.split("\\*");
 
 				for(int i = 1; i < aux.length; i++) {			
@@ -70,24 +71,30 @@ public class RoutingTable {
 					String newDestiny = tuplaString[0];
 					int newMetric = Integer.parseInt(tuplaString[1]);
 
-					if((neigtborList.contains(newDestiny)== false) && (newDestiny.equalsIgnoreCase(this.localHost)== false)) {
-						this.manager.addTuple(newDestiny, newMetric+1, neighborIP);										
+					if((neigtborList.contains(newDestiny)== false) ) {						
+						if((newDestiny.equalsIgnoreCase(this.localHost)== false)) {
+							this.manager.addTuple(newDestiny, newMetric+1, neighborIP);								
+						}															
 					}
 				}	
 
 
 				this.manager.verifyTimestamp();			 		
 
-				String lastTableSendedTemp ="";			
+						
 				for(Tuple x:manager.getTuplasList()) {
 					lastTableSendedTemp = lastTableSendedTemp+"*"+x.getIpDestiny()+";"+x.getMetric();				
 				}
+				
+				
 
 				if(lastTableSendedTemp.equalsIgnoreCase(lastTableSended)) {
 					wereChanged = false;				
 				}else {
 					wereChanged = true;
 					this.lastTableSended = lastTableSendedTemp;
+					
+					
 				}			
 			}		
 
@@ -116,7 +123,7 @@ public class RoutingTable {
 				System.out.println("\n            Routing Table ");
 				System.out.println("------------------------------------------------------------------------------");
 				System.out.printf("%10s %20s %30s", "Destino", "Metrica", "Saida");
-				System.out.println();
+				System.out.println(lastTableSended);
 				System.out.println("------------------------------------------------------------------------------");
 				for(Tuple tupla: manager.getTuplasList()){
 					System.out.format("%10s %20s %30s",tupla.getIpDestiny(), tupla.getMetric(), tupla.getIpOut());
