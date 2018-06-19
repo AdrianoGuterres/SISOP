@@ -69,39 +69,36 @@ public class RoutingTable {
 					String tuplaString[] = aux[i].split(";");
 
 					String newDestiny = tuplaString[0];
+
 					int newMetric = Integer.parseInt(tuplaString[1]);
+					if(newDestiny.equalsIgnoreCase(localHost)) {
 
-					if((neigtborList.contains(newDestiny)== false) ) {						
-						if((newDestiny.equalsIgnoreCase(this.localHost)== false)) {
-							this.manager.addTuple(newDestiny, newMetric+1, neighborIP);								
-						}															
+						for(int j = 0; j < neigtborList.size(); j++) {
+
+							if(neigtborList.get(j).equalsIgnoreCase(newDestiny)==false) {
+								this.manager.addTuple(newDestiny, newMetric, neighborIP);								
+							}
+						}
 					}
-				}	
 
+					this.manager.verifyTimestamp();		
 
-				this.manager.verifyTimestamp();			 		
+					for(Tuple x:manager.getTuplasList()) {
+						lastTableSendedTemp = lastTableSendedTemp+"*"+x.getIpDestiny()+";"+x.getMetric();				
+					}
 
-						
-				for(Tuple x:manager.getTuplasList()) {
-					lastTableSendedTemp = lastTableSendedTemp+"*"+x.getIpDestiny()+";"+x.getMetric();				
-				}
-				
-				
+					if(lastTableSendedTemp.equalsIgnoreCase(lastTableSended)) {
+						wereChanged = false;				
+					}else {
+						wereChanged = true;
+						this.lastTableSended = lastTableSendedTemp;
+					}			
+				}		
 
-				if(lastTableSendedTemp.equalsIgnoreCase(lastTableSended)) {
-					wereChanged = false;				
-				}else {
-					wereChanged = true;
-					this.lastTableSended = lastTableSendedTemp;
-					
-					
-				}			
-			}		
+			}
 
 		} catch (InterruptedException e) {}
 		this.sem.release();
-
-
 	}	
 
 	//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -151,10 +148,10 @@ public class RoutingTable {
 				System.out.println(formattedDate); 
 				System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
 			}	
-			
+
 		} catch (InterruptedException e) {}
 		sem.release();
-		
+
 		return lastTableSended;
 	}
 }

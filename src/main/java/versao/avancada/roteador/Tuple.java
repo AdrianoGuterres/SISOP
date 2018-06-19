@@ -1,5 +1,7 @@
 package versao.avancada.roteador;
 
+import java.util.Set;
+
 public class Tuple {
 	private String ipDestiny;
 	private int metric;
@@ -54,7 +56,19 @@ public class Tuple {
 
 	public void setForRemove(boolean forRemove) {
 		this.forRemove = forRemove;
-	}	
+	}
 
+	
+	@Override
+	public int hashCode() {
+		return (int) (5*getTimeStamp()%999);
+	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if ((obj instanceof Tuple) && ((Tuple) obj).getIpDestiny().equals(this.getIpDestiny())) {
+	        return true;
+	    }else
+	        return false;
+	}
 }

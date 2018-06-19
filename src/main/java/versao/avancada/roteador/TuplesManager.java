@@ -1,5 +1,7 @@
 package versao.avancada.roteador;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
@@ -7,26 +9,34 @@ public class TuplesManager {
 
 	private Semaphore sem;
 
+	String localHost = "";
+
 	private ArrayList<Tuple> tuplasList;
 
 	public TuplesManager(ArrayList<String> neigtborList) {
+
+		try {localHost = InetAddress.getLocalHost().getHostAddress();} catch (UnknownHostException e) {}
+
 		this.sem = new Semaphore(1);
 		this.tuplasList = new ArrayList<Tuple>();
 	}
 
-	public void addTuple(String destinyReveived, int metric, String ipSender) {			
+	public void addTuple(String destinyReveived, int metric, String ipSender) {		
 
+
+		if(destinyReveived.equalsIgnoreCase(localHost)==false) {
+			if(updateTupla(destinyReveived, metric, ipSender) == false) {	
+				tuplasList.add(new Tuple(destinyReveived, metric, ipSender));			
+			}
+
+		}
 		updateTimestampNeibor(ipSender);	
-
-		if(updateTupla(destinyReveived, metric, ipSender) == false) {	
-			tuplasList.add(new Tuple(destinyReveived, metric, ipSender));			
-		}	
 	}		
 
 	public ArrayList<Tuple> getTuplasList() {
 		return tuplasList;
 	}	
-	
+
 
 	public void verifyTimestamp() {
 		try {
@@ -64,9 +74,10 @@ public class TuplesManager {
 						sem.acquire();
 						tuplasList.get(i).setIpOut(ipSender);
 						tuplasList.get(i).setTimeStamp(newTimestamp);
-						tuplasList.get(i).setMetric(metric);
-						aux = true;		
+						tuplasList.get(i).setMetric(metric);							
 					}			
+					aux = true;	
+					tuplasList.get(i).setTimeStamp(newTimestamp);
 				}
 			}
 			sem.release();
