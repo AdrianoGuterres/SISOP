@@ -23,7 +23,7 @@ public class MessageReceiver implements Runnable{
 		DatagramSocket serverSocket = null;
 
 		try {
-			serverSocket = new DatagramSocket(5000);
+			serverSocket = new DatagramSocket(5001);
 		} catch (SocketException ex) {
 			JOptionPane.showMessageDialog(null,"The datagram couldn't be initialized: "+ ex);
 			return;
