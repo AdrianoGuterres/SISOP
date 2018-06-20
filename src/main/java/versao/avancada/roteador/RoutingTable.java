@@ -76,9 +76,12 @@ public class RoutingTable {
 					
 
 						for(int j = 0; j < neigtborList.size(); j++) {
-
-							if(neigtborList.get(j).equalsIgnoreCase(localHost)==false) {
-								this.manager.addTuple(newDestiny, newMetric, neighborIP);								
+							
+							if(localHost.equalsIgnoreCase(newDestiny)== false) {
+								if(neigtborList.get(j).equalsIgnoreCase(localHost)==false) {
+									this.manager.addTuple(newDestiny, newMetric, neighborIP);	
+								
+							}														
 						}
 					}
 				}	

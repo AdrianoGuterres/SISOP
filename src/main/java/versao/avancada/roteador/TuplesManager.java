@@ -22,10 +22,6 @@ public class TuplesManager {
 	}
 
 
-
-
-
-
 	public void addTuple(String destinyReveived, int metric, String ipSender) {		
 
 		long timestamp = new Long(System.currentTimeMillis());
