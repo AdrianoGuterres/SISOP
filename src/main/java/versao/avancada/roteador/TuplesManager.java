@@ -57,7 +57,7 @@ public class TuplesManager {
 	public void updateTimestampNeibor(String ipSender) {	
 		try {
 			sem.acquire();
-			long timeStamp = System.currentTimeMillis();
+			long timeStamp = System.currentTimeMillis();   
 			for(int i = 0; i< tuplasList.size(); i++) {
 				if(tuplasList.get(i).getIpDestiny().equalsIgnoreCase(ipSender)) {
 					tuplasList.get(i).setTimeStamp(timeStamp);
