@@ -15,6 +15,7 @@ public class MessageReceiver implements Runnable{
 	public MessageReceiver(RoutingTable t, Semaphore sem){
 		this.table = t;
 		this.sem = sem;
+		
 	}
 
 	@SuppressWarnings("resource")
