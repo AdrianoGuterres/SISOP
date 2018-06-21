@@ -40,8 +40,6 @@ public class TuplesManager {
 					this.tuplasList.get(i).setMetric(newMetric);		
 					this.tuplasList.get(i).setIpOut(newIpOut);
 					this.tuplasList.get(i).setTimeStamp(timestamp+30000);						
-				}else {
-					this.tuplasList.get(i).setTimeStamp(timestamp+30000);	
 				}				
 				aux = true;				
 			}			
@@ -73,7 +71,7 @@ public class TuplesManager {
 
 		int aux = 0;
 
-		for(int i = 0; i < this.tuplasList.size(); i++) {
+		for(int i = 0; i < this.tuplasList.size(); i++) {			
 			if(this.tuplasList.get(i).getTimeStamp()  <  timestamp) {
 				this.tuplasList.remove(i);
 				aux++;

@@ -1,6 +1,7 @@
 package versao.avancada.roteador;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -24,9 +25,13 @@ public class RoutingTable {
 		this.wereChanged = false;
 		this.manager = new TuplesManager();			
 		this.neigtborsList = new ArrayList<>(neighborList);
-		this.localHost = "192.168.15.6";
-
-		System.out.println(localHost);
+		this.localHost = "";
+		
+		try {
+			localHost = InetAddress.getLocalHost().getHostAddress();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
 
 		fillTableWithNeibors();
 	}
