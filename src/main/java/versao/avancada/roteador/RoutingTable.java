@@ -7,40 +7,33 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.concurrent.Semaphore;
 
 public class RoutingTable {
 
 	private TuplesManager manager;
-
+	
 	private ArrayList<String> neigtborList;
 	private ArrayList<String> neigtborListAux;
+
 	private String lastTableSended;
 	private String localHost;
-
+	
 	private boolean wereChanged;	
-
-	private Semaphore sem;
-
+	
 	public RoutingTable(ArrayList<String> neighborList, String localHost) throws IOException{
 		this.neigtborList = new ArrayList<>(neighborList);
-		this.neigtborListAux = new ArrayList<>(neigtborList);
-
-		this.manager = new TuplesManager(neighborList);				
-
-		this.localHost = InetAddress.getLocalHost().getHostAddress();
-		this.sem = new Semaphore(1);
+		this.neigtborListAux = new ArrayList<>(neigtborList);		
 		
-		this.lastTableSended = "";
+		this.manager = new TuplesManager(neighborList);				
+		
+		this.localHost = InetAddress.getLocalHost().getHostAddress();
+
+		lastTableSended = "";
 
 		for(String x:neighborList) {
-			this.manager.addTuple(x, 1, x);
-			this.neigtborList.add(x);
-			this.neigtborListAux.add(x);
-			
-			this.manager.addTuple(x, 1, x);
-			
-			System.out.println(lastTableSended);
+			manager.addTuple(x, 1, x);
+			neigtborList.add(x);
+			neigtborListAux.add(x);
 		}
 	}
 
@@ -51,117 +44,90 @@ public class RoutingTable {
 	//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	public void updateTabela(String receivedTable, String neighborIP){	
 		
-		this.manager.updateTupla(neighborIP, 1, neighborIP);
-
-		try {
-			this.sem.acquire();
-
-			//verifica se é entrada de rede
-			if(receivedTable.contains("!")) {
-				wereChanged = true;
-				if(neigtborList.contains(neighborIP)) {
-					neigtborListAux.add(neighborIP);			
-					manager.addTuple(neighborIP, 1, neighborIP);
-				}
-
-			}else {
-				String[] aux = receivedTable.split("\\*");
-
-				for(int i = 1; i < aux.length; i++) {			
-					String tuplaString[] = aux[i].split(";");
-
-					String newDestiny = tuplaString[0];
-
-					int newMetric = Integer.parseInt(tuplaString[1]);
-					
-
-						for(int j = 0; j < neigtborList.size(); j++) {
-							
-							if(localHost.equalsIgnoreCase(newDestiny)== false) {
-								if(neigtborList.get(j).equalsIgnoreCase(localHost)==false) {
-									this.manager.addTuple(newDestiny, newMetric, neighborIP);	
-								
-							}														
-						}
-					}
-				}	
+		//verifica se é entrada de rede
+		if(receivedTable.contains("!")) {
+			wereChanged = true;
+			if(neigtborList.contains(neighborIP)) {
+				neigtborListAux.add(neighborIP);			
+				manager.addTuple(neighborIP, 1, neighborIP);
 			}
 
-		} catch (InterruptedException e) {}
-		this.sem.release();
+		}else {
+			
+			String[] aux = receivedTable.split("\\*");
+
+			for(int i = 1; i < aux.length; i++) {			
+				String tuplaString[] = aux[i].split(";");
+				
+				String newDestiny = tuplaString[0];
+				int newMetric = Integer.parseInt(tuplaString[1]);
+				
+				if((neigtborList.contains(newDestiny)== false) && (newDestiny.equalsIgnoreCase(this.localHost)== false)) {
+					this.manager.addTuple(newDestiny, newMetric+1, neighborIP);										
+				}
+			}	
+			
+						
+			this.manager.verifyTimestamp();			 		
+			
+			String lastTableSendedTemp ="";			
+			for(Tuple x:manager.getTuplasList()) {
+				lastTableSendedTemp = lastTableSendedTemp+"*"+x.getIpDestiny()+";"+x.getMetric();				
+			}
+			
+			if(lastTableSendedTemp.equalsIgnoreCase(lastTableSended)) {
+				wereChanged = false;				
+			}else {
+				wereChanged = true;
+				this.lastTableSended = lastTableSendedTemp;
+			}			
+		}		
 	}	
 
 	//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 	int count = 0;
 	public String get_tabela_string(){		
-		String lastTableSendedTemp ="";	
-		
+		DateFormat formato = new SimpleDateFormat("HH:mm:ss");
+		Date date = new Date();
+		String formattedDate = formato.format(date);
 
-		try {			
-			this.sem.acquire();
-			
-
-			this.manager.verifyTimestamp();		
-
-			for(Tuple x:manager.getTuplasList()) {
-				lastTableSendedTemp = lastTableSendedTemp+"*"+x.getIpDestiny()+";"+x.getMetric();				
+		if((neigtborList.size() == 0) || (count ==0)){
+			System.out.println("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+			System.out.println("Message sending for Routers Neighbors: ");	
+			System.out.println( "!");	
+			System.out.println("\n            Routing Table ");
+			System.out.println("------------------------------------------------------------------------------");
+			System.out.printf("%10s %20s %30s", "Destino", "Metrica", "Saida");
+			System.out.println();
+			System.out.println("------------------------------------------------------------------------------");
+			for(Tuple tupla: manager.getTuplasList()){
+				System.out.format("%10s %20s %30s",tupla.getIpDestiny(), tupla.getMetric(), tupla.getIpOut());
+				System.out.println();
 			}
+			System.out.println("------------------------------------------------------------------------------");
+			System.out.println(formattedDate); 
+			System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
+			count++;
 
-			if(lastTableSendedTemp.equalsIgnoreCase(lastTableSended)) {
-				wereChanged = false;				
-			}else {
-				wereChanged = true;
-				this.lastTableSended = lastTableSendedTemp;
-			}						
-
-			DateFormat formato = new SimpleDateFormat("HH:mm:ss");
-			Date date = new Date();
-			String formattedDate = formato.format(date);
-			
-
-			if((neigtborList.size() == 0) || count == 0){
-				System.out.println("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-				System.out.println("Message sending for Routers Neighbors: ");	
-				System.out.println( "!");	
-				System.out.println("\n            Routing Table ");
-				System.out.println("------------------------------------------------------------------------------");
-				System.out.printf("%10s %20s %30s", "Destino", "Metrica", "Saida");
+		}else {		
+			System.out.println("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+			System.out.println("Message sending for Routers Neighbors: ");	
+			System.out.println(lastTableSended);	
+			System.out.println("\n            Routing Table ");
+			System.out.println("------------------------------------------------------------------------------");
+			System.out.printf("%10s %20s %30s", "Destino", "Metrica", "Saida");
+			System.out.println();
+			System.out.println("------------------------------------------------------------------------------");
+			for(Tuple tupla:  manager.getTuplasList()){
+				System.out.format("%10s %20s %30s",tupla.getIpDestiny(), tupla.getMetric(), tupla.getIpOut());
 				System.out.println();
-				System.out.println("------------------------------------------------------------------------------");
-				for(Tuple tupla: manager.getTuplasList()){
-					System.out.format("%10s %20s %30s",tupla.getIpDestiny(), tupla.getMetric(), tupla.getIpOut());
-					System.out.println();
-				}
-				System.out.println("------------------------------------------------------------------------------");
-				System.out.println(formattedDate); 
-				System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
-				count++;
+			}
+			System.out.println("------------------------------------------------------------------------------");
+			System.out.println(formattedDate); 
+			System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
 
-			}else {		
-				System.out.println("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-				System.out.println("Message sending for Routers Neighbors: ");	
-				System.out.println(lastTableSended);	
-				System.out.println("\n            Routing Table ");
-				System.out.println("------------------------------------------------------------------------------");
-				System.out.printf("%10s %20s %30s", "Destino", "Metrica", "Saida");
-				System.out.println();
-				System.out.println("------------------------------------------------------------------------------");
-				for(Tuple tupla:  manager.getTuplasList()){
-					System.out.format("%10s %20s %30s",tupla.getIpDestiny(), tupla.getMetric(), tupla.getIpOut());
-					System.out.println();
-				}
-				System.out.println("------------------------------------------------------------------------------");
-				System.out.println(formattedDate); 
-				System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
-			}	
-			
-			
-
-		} catch (InterruptedException e) {}
-		sem.release();
-		count ++;
-
+		}	
 		return lastTableSended;
 	}
 }
