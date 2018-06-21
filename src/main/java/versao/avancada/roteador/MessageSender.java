@@ -17,7 +17,7 @@ public class MessageSender implements Runnable{
 		this.neighborIPs = new ArrayList<>();
 		this.neighborIPs = neighborIPs;
 		this.sem = sem;
-	}
+	} 
 
 	@Override
 	public void run() {

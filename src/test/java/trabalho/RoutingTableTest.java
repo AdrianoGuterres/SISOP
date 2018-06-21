@@ -51,7 +51,7 @@ public class RoutingTableTest {
 		RoutingTable tabela = new RoutingTable(listaVizinhos, localHost);
 		
 		int count = 0;		
-		while (count != 100000) {
+		while (count != 10) {
 			for(String x: datagramas) { 
 				
 				tabela.updateTabela(x, vizinho1);
@@ -60,6 +60,8 @@ public class RoutingTableTest {
 			}			
 			
 			tabela.get_tabela_string();
+			
+			count ++;
 			
 			Thread.sleep(1000);
 		}

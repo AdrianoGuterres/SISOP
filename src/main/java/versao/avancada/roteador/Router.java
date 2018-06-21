@@ -21,7 +21,7 @@ public class Router {
         try ( BufferedReader inputFile = new BufferedReader(new FileReader("src/IPVizinhos.txt"))) {
             String ip;            
             while( (ip = inputFile.readLine()) != null){
-                neighborsList.add(ip);
+                neighborsList.add(ip); 
             }
             
         } catch (Exception ex) {

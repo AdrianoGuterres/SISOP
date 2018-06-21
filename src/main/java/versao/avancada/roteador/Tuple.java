@@ -13,7 +13,7 @@ public class Tuple {
 		setTimeStamp(System.currentTimeMillis()+30000);	
 	}
 
-	public String getIpDestiny() {
+	public String getIpDestiny() { 
 		return ipDestiny;
 	}
 

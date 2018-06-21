@@ -16,7 +16,7 @@ public class MessageReceiver implements Runnable{
 		this.table = t;
 		this.sem = sem;
 		
-	}
+	} 
 
 	@SuppressWarnings("resource")
 	@Override

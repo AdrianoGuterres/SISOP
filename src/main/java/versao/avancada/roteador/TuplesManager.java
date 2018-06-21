@@ -16,12 +16,12 @@ public class TuplesManager {
 
 
 
-
+ 
 
 
 	public void addTuple(String ipDestiny, int metric, String ipOut) {
 
-		this.tuplasList.add(new Tuple(ipDestiny, metric, ipOut));
+		this.tuplasList.add(new Tuple(ipDestiny, metric, ipOut)); 
 	}
 
 
@@ -36,18 +36,12 @@ public class TuplesManager {
 
 		for(int i = 0; i < this.tuplasList.size(); i++) {
 			if(this.tuplasList.get(i).getIpDestiny().equalsIgnoreCase(ipDestiny)) {
-				if(this.tuplasList.get(i).getMetric()>(newMetric + 1)) {
-					this.tuplasList.get(i).setMetric(newMetric+1);		
+				if(this.tuplasList.get(i).getMetric()>(newMetric)) {
+					this.tuplasList.get(i).setMetric(newMetric);		
 					this.tuplasList.get(i).setIpOut(newIpOut);
-					this.tuplasList.get(i).setTimeStamp(timestamp+30000);	
-					
-					
+					this.tuplasList.get(i).setTimeStamp(timestamp+30000);						
 				}else {
-
-					System.out.println(this.tuplasList.get(i).getTimeStamp());
 					this.tuplasList.get(i).setTimeStamp(timestamp+30000);	
-					System.out.println(this.tuplasList.get(i).getTimeStamp());
-					System.out.println(this.tuplasList.get(i).getTimeStamp() - System.currentTimeMillis());
 				}				
 				aux = true;				
 			}			
