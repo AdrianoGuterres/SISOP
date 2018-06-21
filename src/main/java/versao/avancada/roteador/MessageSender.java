@@ -45,22 +45,20 @@ public class MessageSender implements Runnable{
 						clientSocket = new DatagramSocket();
 						IPAddress = InetAddress.getByName(x);					
 						
-						DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 5000);  					     
+						DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 5001);  					     
 						clientSocket.send(sendPacket);		
 						clientSocket.close();	
 						
-						if(table.isChanged() == true) {
-							Thread.sleep(10000);		
+						if(table.isWereChanged() == true) {
+							Thread.sleep(1000);		
 						}else {
-							Thread.sleep(20000);
+							Thread.sleep(1000);
 						}						
 					}
 					
 				} catch (Exception ex) {
 					JOptionPane.showMessageDialog(null,"The datagram couldn't be sent: "+ ex);
-				}				
-				
-
+				}			
 		}
 	}
 }

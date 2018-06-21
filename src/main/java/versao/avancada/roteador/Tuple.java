@@ -5,15 +5,12 @@ public class Tuple {
 	private int metric;
 	private String ipOut;
 	private long timeStamp;
-	private boolean forRemove;
 
 	public Tuple(String ipDestiny, int metric, String ipOut) {
-
 		setIpDestiny(ipDestiny);
 		setIpOut(ipOut);			
 		setMetric(metric);
-		setTimeStamp(System.currentTimeMillis());			
-		setForRemove(false);		
+		setTimeStamp(System.currentTimeMillis()+30000);	
 	}
 
 	public String getIpDestiny() {
@@ -47,14 +44,5 @@ public class Tuple {
 	public void setTimeStamp(long timeStamp) {
 		this.timeStamp = timeStamp;
 	}
-
-	public boolean isForRemove() {
-		return forRemove;
-	}
-
-	public void setForRemove(boolean forRemove) {
-		this.forRemove = forRemove;
-	}	
-
 
 }
