@@ -70,12 +70,16 @@ public class TuplesManager {
 		long timestamp = new Long (System.currentTimeMillis());	
 
 		int aux = 0;
+		
+		
 
-		for(int i = 0; i < this.tuplasList.size(); i++) {			
-			if((this.tuplasList.get(i).getTimeStamp()  <  timestamp) && (this.tuplasList.get(i).getMetric() == 1)) {
-				this.tuplasList.remove(i);
-				aux++;
-			}			
+		for(int i = 0; i < this.tuplasList.size(); i++) {		
+			if(this.tuplasList.get(i).getTimeStamp()  <  timestamp) {
+				if(this.tuplasList.get(i).getMetric() == 1) {
+					this.tuplasList.remove(i);
+					aux++;
+				}				
+			}						
 		} 	
 		return aux;
 	}
