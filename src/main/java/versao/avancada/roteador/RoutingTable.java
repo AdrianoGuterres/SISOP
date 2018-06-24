@@ -61,10 +61,24 @@ public class RoutingTable {
 			this.wereChanged = true;
 
 		}else {
-
+			
 			String[] tableSplitedForAsterisk = receivedTable.trim().split("\\*");
-			for(int i = 1; i < tableSplitedForAsterisk.length; i++) {
-				String[] tuple = tableSplitedForAsterisk[i].split(";");
+			ArrayList<String> aux = new ArrayList<>();
+			
+			for(int i = 0; i < tableSplitedForAsterisk.length; i++) {
+				aux.add(tableSplitedForAsterisk[i]);								
+			}
+			
+			
+			
+			
+
+			
+			for(int i = 1; i < aux.size(); i++) {
+				String[] tuple = aux.get(i).split(";");
+				System.out.println("Tupla completa: "+tableSplitedForAsterisk[i]);
+				System.out.println("Destino: "+tuple[0]+"   metrica: "+ tuple[1]);
+				
 				String newDestiny = tuple[0];
 				int newMetric = Integer.parseInt(tuple[1]);
 
@@ -86,6 +100,8 @@ public class RoutingTable {
 						}						
 					}					
 				}	
+				newDestiny = "";
+				newMetric = 0;
 			}				
 		}
 

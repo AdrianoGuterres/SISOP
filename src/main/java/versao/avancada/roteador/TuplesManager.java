@@ -38,7 +38,7 @@ public class TuplesManager {
 		}		
 		return aux;
 	}
-	
+
 	public Tuple updateByDestiny(String ipDestiny, int metric, String ipOut) {
 		Tuple tuple = null;
 		long newTimestamp = System.currentTimeMillis() + 30000;
@@ -48,35 +48,29 @@ public class TuplesManager {
 				tuplasList.get(i).setMetric(metric);				
 				tuplasList.get(i).setIpOut(ipOut);
 				tuplasList.get(i).setTimeStamp(newTimestamp);
-				
+
 				tuple = tuplasList.get(i);				
 			}			
 		}		
 		return tuple;		
 	}
-	
-	
+
+
 	public boolean removeNeigtborbyTimestamp() {
 		boolean aux = false;
-		for(int i =0;i<tuplasList.size(); i++) {			
-			
-			if(tuplasList.get(i).getIpDestiny().equalsIgnoreCase(tuplasList.get(i).getIpOut())) {
-				if(tuplasList.get(i).getMetric() == 1) {
-					if((tuplasList.get(i).getTimeStamp()+30000) < System.currentTimeMillis() ) {
-						
-						tuplasList.remove(i);
-						aux = true;							
-					}						
-				}						
-			}			
-		}		
+		for(int i =0;i<tuplasList.size(); i++) {		
+			if((tuplasList.get(i).getTimeStamp()) < System.currentTimeMillis() ) {
+				tuplasList.remove(i);
+				aux = true;			
+			}
+		}
 		return aux;
 	}
-	
-	
+
+
 	public ArrayList<Tuple> getTuplesList(){
 		return this.tuplasList;
 	}
 
-	
+
 }
