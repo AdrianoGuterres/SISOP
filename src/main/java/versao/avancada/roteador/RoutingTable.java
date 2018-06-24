@@ -15,20 +15,20 @@ public class RoutingTable {
 
 	private String tableForSend;	
 	private String localHost;
- 
+
 	private boolean wereChanged;
 	private Semaphore sem; 
 
-	public RoutingTable(ArrayList<String> neighborList, String localHost) {
+	public RoutingTable(ArrayList<String> neighborList) {
 
 		this.sem = new Semaphore(1);		
 		this.wereChanged = false;
 		this.manager = new TuplesManager();			
 		this.neigtborsList = new ArrayList<>(neighborList);
-		this.localHost = "";
-		
+		this.localHost = "192.168.15.6";
+
 		try {
-			localHost = InetAddress.getLocalHost().getHostAddress();
+			System.out.println(InetAddress.getLocalHost().getHostAddress());
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
@@ -37,18 +37,24 @@ public class RoutingTable {
 	}
 
 	public void fillTableWithNeibors() {
-		for(int i =0; i < this.neigtborsList.size(); i++) {			
-			String aux = this.neigtborsList.get(i);
-			manager.addNeigtbor(aux);
-			tableForSend = tableForSend+"*"+aux+";1";			
+		for(int i =0; i < this.neigtborsList.size(); i++) {	
+
+			String newNeigtbor = neigtborsList.get(i);
+
+			manager.addTuple(newNeigtbor, i, newNeigtbor);
+
+
+			tableForSend = tableForSend+"*"+newNeigtbor+";1";			
 		}
 	}
+
+
 
 	//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	public void updateTabela(String receivedTable, String neigtbor){	
 		try { this.sem.acquire(); } catch (InterruptedException e) {}	
-		
-		manager.updateTuple(neigtbor, 1, neigtbor);
+
+		manager.updateByDestiny(neigtbor, 1, neigtbor);
 
 
 		if(receivedTable.trim().contains("!")) {			
@@ -61,15 +67,23 @@ public class RoutingTable {
 				String[] tuple = tableSplitedForAsterisk[i].split(";");
 				String newDestiny = tuple[0];
 				int newMetric = Integer.parseInt(tuple[1]);
-				
+
 				//verifica se é meu ip
 				if(newDestiny.equalsIgnoreCase(this.localHost) == false) {
-					// não é meu ip, verifico se já tenho o destino se positivo atualizo
-					if(manager.updateTuple(newDestiny, newMetric+1, neigtbor)==false) {
-						this.manager.addTuple(newDestiny, newMetric+1, neigtbor);						
-					}					
-				}			
-			}					
+
+					Tuple tupleAux = manager.searchByDestiny(newDestiny);
+
+					if(tupleAux != null) {
+
+						if(tupleAux.getMetric() > newMetric) {
+							manager.updateByDestiny(newDestiny, (newMetric + 1), neigtbor);							
+						}
+
+					}else {
+						manager.addTuple(newDestiny, (newMetric + 1), neigtbor);
+					}
+				}	
+			}				
 		}
 
 		sem.release();
@@ -138,10 +152,10 @@ public class RoutingTable {
 			System.out.println("------------------------------------------------------------------------------");
 			System.out.println(formattedDate); 
 			System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
-		}	
+		}			
 
 
-		this.manager.removeByTimestamp();
+		this.manager.removeNeigtborbyTimestamp();
 
 		sem.release();
 

@@ -13,13 +13,11 @@ public class Router {
     public static void main(String[] args) throws IOException {
     	
     	Semaphore mutex = new Semaphore(1);
-    	
-    	String localHost = InetAddress.getLocalHost().getHostAddress();
        
        final ArrayList<String> neighborsList = new ArrayList<>();
         
         try ( BufferedReader inputFile = new BufferedReader(new FileReader("src/IPVizinhos.txt"))) {
-            String ip;            
+            String ip ="";            
             while( (ip = inputFile.readLine()) != null){
                 neighborsList.add(ip); 
             }
@@ -29,7 +27,7 @@ public class Router {
             return;
         }        
       
-        RoutingTable table = new RoutingTable(neighborsList, localHost);         
+        RoutingTable table = new RoutingTable(neighborsList);         
         Thread receiver = new Thread(new MessageReceiver(table, mutex));        
         Thread sender = new Thread(new MessageSender(table, neighborsList, mutex));        
           

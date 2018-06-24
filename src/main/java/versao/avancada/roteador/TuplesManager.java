@@ -7,107 +7,76 @@ public class TuplesManager {
 	private ArrayList<Tuple> tuplasList;
 
 
-
-
-
 	public TuplesManager() {
 		this.tuplasList = new ArrayList<>();
-	}
-
-
-
- 
+	} 
 
 
 	public void addTuple(String ipDestiny, int metric, String ipOut) {
-
 		this.tuplasList.add(new Tuple(ipDestiny, metric, ipOut)); 
 	}
 
-
-
-
-
-
-	public boolean updateTuple(String ipDestiny, int newMetric, String newIpOut) {
-		boolean aux = false;
-
-		long timestamp = new Long (System.currentTimeMillis());	
-
-		for(int i = 0; i < this.tuplasList.size(); i++) {
-			if(this.tuplasList.get(i).getIpDestiny().equalsIgnoreCase(ipDestiny)) {
-				if(this.tuplasList.get(i).getMetric()>(newMetric)) {
-					this.tuplasList.get(i).setMetric(newMetric);		
-					this.tuplasList.get(i).setIpOut(newIpOut);
-					this.tuplasList.get(i).setTimeStamp(timestamp+30000);						
-				}				
-				aux = true;				
-			}			
-		}		
-		return aux;		
-	}
-
-
-
-
-	public boolean removeTuple(String ipDestiny) {
-		boolean aux = false;
-
-		for(int i = 0; i < this.tuplasList.size(); i++) {
-			if(this.tuplasList.get(i).getIpDestiny().equalsIgnoreCase(ipDestiny)) {
-				this.tuplasList.remove(i);
-				aux = true;
-			}			
-		} 	
-		return aux;
-	}
-
-
-
-
-
-	public int removeByTimestamp() {
-		long timestamp = new Long (System.currentTimeMillis());	
-
-		int aux = 0;
-		
-		
-
-		for(int i = 0; i < this.tuplasList.size(); i++) {		
-			if(this.tuplasList.get(i).getTimeStamp()  <  timestamp) {
-				if(this.tuplasList.get(i).getMetric() == 1) {
-					this.tuplasList.remove(i);
-					aux++;
-				}				
-			}						
-		} 	
-		return aux;
-	}
-
-
-
-
-
 	public Tuple searchByDestiny(String ipDestiny) {
 		Tuple tuple = null;
-		for(int i = 0; i < this.tuplasList.size(); i++) {
-			if(this.tuplasList.get(i).getIpDestiny().equalsIgnoreCase(ipDestiny)) {
-				tuple = this.tuplasList.get(i);					
+
+		for(int i =0;i<tuplasList.size(); i++) {
+			if(tuplasList.get(i).getIpDestiny().equalsIgnoreCase(ipDestiny)) {
+				tuple = tuplasList.get(i);				
 			}			
-		} 	
+		}		
 		return tuple;		
 	}
 
 
+	public boolean removeTuple(String ipDestiny) {
+		boolean aux = false;
+		for(int i =0;i<tuplasList.size(); i++) {
+			if(tuplasList.get(i).getIpDestiny().equalsIgnoreCase(ipDestiny)) {
+				tuplasList.remove(i);	
+				aux = true;
+			}			
+		}		
+		return aux;
+	}
+	
+	public Tuple updateByDestiny(String ipDestiny, int metric, String ipOut) {
+		Tuple tuple = null;
+		long newTimestamp = System.currentTimeMillis() + 30000;
 
-
-
-
+		for(int i =0;i<tuplasList.size(); i++) {
+			if(tuplasList.get(i).getIpDestiny().equalsIgnoreCase(ipDestiny)) {
+				tuplasList.get(i).setMetric(metric);				
+				tuplasList.get(i).setIpOut(ipOut);
+				tuplasList.get(i).setTimeStamp(newTimestamp);
+				
+				tuple = tuplasList.get(i);				
+			}			
+		}		
+		return tuple;		
+	}
+	
+	
+	public boolean removeNeigtborbyTimestamp() {
+		boolean aux = false;
+		for(int i =0;i<tuplasList.size(); i++) {			
+			
+			if(tuplasList.get(i).getIpDestiny().equalsIgnoreCase(tuplasList.get(i).getIpOut())) {
+				if(tuplasList.get(i).getMetric() == 1) {
+					if((tuplasList.get(i).getTimeStamp()+30000) < System.currentTimeMillis() ) {
+						
+						tuplasList.remove(i);
+						aux = true;							
+					}						
+				}						
+			}			
+		}		
+		return aux;
+	}
+	
+	
 	public ArrayList<Tuple> getTuplesList(){
 		return this.tuplasList;
 	}
 
-	public void addNeigtbor(String neihtbor) {
-		tuplasList.add(new Tuple(neihtbor, 1, neihtbor));		
-	}
+	
 }
