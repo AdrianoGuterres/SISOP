@@ -41,7 +41,7 @@ public class RoutingTable {
 
 			String newNeigtbor = neigtborsList.get(i);
 
-			manager.addTuple(newNeigtbor, i, newNeigtbor);
+			manager.addTuple(newNeigtbor, 1, newNeigtbor);
 
 
 			tableForSend = tableForSend+"*"+newNeigtbor+";1";			
