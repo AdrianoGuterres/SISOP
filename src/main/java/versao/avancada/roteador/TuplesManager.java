@@ -6,50 +6,35 @@ import java.util.concurrent.Semaphore;
 public class TuplesManager {
 
 	private ArrayList<Tuple> tuplasList;
-	
+
 	private Semaphore sem;
 
 
 	public TuplesManager() {
 		this.tuplasList = new ArrayList<>();
-		this.sem = new Semaphore(1);
+		sem = new Semaphore(1);
 	} 
 
 
 	public void addTuple(String ipDestiny, int metric, String ipOut) {
-		
-		try {
-			sem.acquire();
-			this.tuplasList.add(new Tuple(ipDestiny, metric, ipOut)); 
-		} catch (InterruptedException e) {}
-		
-		sem.release();
-		
 		this.tuplasList.add(new Tuple(ipDestiny, metric, ipOut)); 
 	}
 
 	public Tuple searchByDestiny(String ipDestiny) {
 		Tuple tuple = null;
-		
-		try {
-			sem.acquire();
-			for(int i =0;i<tuplasList.size(); i++) {
-				if(tuplasList.get(i).getIpDestiny().equalsIgnoreCase(ipDestiny)) {
-					tuple = tuplasList.get(i);				
-				}			
-			}		
-			
-		} catch (InterruptedException e) {}
 
-				sem.release();
+		for(int i =0;i<tuplasList.size(); i++) {
+			if(tuplasList.get(i).getIpDestiny().equalsIgnoreCase(ipDestiny)) {
+				tuple = tuplasList.get(i);				
+			}			
+		}		
 		return tuple;		
 	}
 
 
 	public boolean removeTuple(String ipDestiny) {
-
 		boolean aux = false;
-		
+
 		try {
 			sem.acquire();
 			for(int i =0;i<tuplasList.size(); i++) {
@@ -57,19 +42,18 @@ public class TuplesManager {
 					tuplasList.remove(i);	
 					aux = true;
 				}			
-			}
-			
+			}		
 		} catch (InterruptedException e) {}
-		
-		sem.release();		
-		
+
+
+		sem.release();
 		return aux;
 	}
 
 	public Tuple updateByDestiny(String ipDestiny, int metric, String ipOut) {
 		Tuple tuple = null;
 		long newTimestamp = System.currentTimeMillis() + 30000;
-		
+
 		try {
 			sem.acquire();
 			for(int i =0;i<tuplasList.size(); i++) {
@@ -80,38 +64,29 @@ public class TuplesManager {
 
 					tuple = tuplasList.get(i);				
 				}			
-			}		
-		} catch (InterruptedException e) {}		
+			}
+		} catch (InterruptedException e) {}
+
+		sem.release();
+
 		return tuple;		
 	}
 
 
 	public boolean removeNeigtborbyTimestamp() {
-
 		boolean aux = false;
-		try {
-			sem.acquire();
-			for(int i =0;i<tuplasList.size(); i++) {		
-				if((tuplasList.get(i).getTimeStamp()) < System.currentTimeMillis() ) {
-					tuplasList.remove(i);
-					aux = true;			
-				}
+		for(int i =0;i<tuplasList.size(); i++) {		
+			if((tuplasList.get(i).getTimeStamp()) < System.currentTimeMillis() ) {
+				tuplasList.remove(i);
+				aux = true;			
 			}
-		} catch (InterruptedException e) {}		
+		}
 		return aux;
 	}
 
 
 	public ArrayList<Tuple> getTuplesList(){
-		ArrayList<Tuple> aux = null;
-		
-		try {
-			sem.acquire();
-			aux = this.tuplasList;
-			sem.release();
-		} catch (InterruptedException e) {}
-		
-		return aux;		
+		return this.tuplasList;
 	}
 
 
