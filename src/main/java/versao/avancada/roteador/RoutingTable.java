@@ -119,10 +119,7 @@ public class RoutingTable {
 
 
 		for(int i = 0; i<manager.getTuplesList().size(); i++){
-			String destinyTemp = manager.getTuplesList().get(i).getIpDestiny();
-			int metricTemp = manager.getTuplesList().get(i).getMetric();
-
-			tableForSendTemp = tableForSendTemp+"*"+ destinyTemp+";"+metricTemp;					
+			tableForSendTemp = tableForSendTemp+"*"+ manager.getTuplesList().get(i).getIpDestiny()+";"+manager.getTuplesList().get(i).getMetric();					
 		}
 
 		if(tableForSendTemp.equalsIgnoreCase(this.tableForSend)== false) {
