@@ -3,7 +3,6 @@ package versao.avancada.roteador;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 import javax.swing.JOptionPane;

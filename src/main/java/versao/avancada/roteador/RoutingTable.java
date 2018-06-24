@@ -70,14 +70,10 @@ public class RoutingTable {
 			}
 			
 			
-			
-			
-
-			
 			for(int i = 1; i < aux.size(); i++) {
+				System.out.println(receivedTable);
 				String[] tuple = aux.get(i).split(";");
-				System.out.println("Tupla completa: "+tableSplitedForAsterisk[i]);
-				System.out.println("Destino: "+tuple[0]+"   metrica: "+ tuple[1]);
+				System.out.println("Tupla completa: "+tableSplitedForAsterisk[i] + "                                 Destino: "+tuple[0]+"     metrica: "+ tuple[1] +"\n");
 				
 				String newDestiny = tuple[0];
 				int newMetric = Integer.parseInt(tuple[1]);
