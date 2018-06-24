@@ -62,7 +62,7 @@ public class RoutingTable {
 
 		}else {
 
-			String[] tableSplitedForAsterisk = receivedTable.split("\\*");
+			String[] tableSplitedForAsterisk = receivedTable.trim().split("\\*");
 			for(int i = 1; i < tableSplitedForAsterisk.length; i++) {
 				String[] tuple = tableSplitedForAsterisk[i].split(";");
 				String newDestiny = tuple[0];
@@ -70,18 +70,21 @@ public class RoutingTable {
 
 				//verifica se é meu ip
 				if(newDestiny.equalsIgnoreCase(this.localHost) == false) {
+					
+					if(neigtborsList.contains(newDestiny)== false) {
+						
+						Tuple tupleAux = manager.searchByDestiny(newDestiny);
 
-					Tuple tupleAux = manager.searchByDestiny(newDestiny);
+						if(tupleAux != null) {
 
-					if(tupleAux != null) {
+							if(tupleAux.getMetric() > newMetric) {
+								manager.updateByDestiny(newDestiny, (newMetric + 1), neigtbor);							
+							}
 
-						if(tupleAux.getMetric() > newMetric) {
-							manager.updateByDestiny(newDestiny, (newMetric + 1), neigtbor);							
-						}
-
-					}else {
-						manager.addTuple(newDestiny, (newMetric + 1), neigtbor);
-					}
+						}else {
+							manager.addTuple(newDestiny, (newMetric + 1), neigtbor);
+						}						
+					}					
 				}	
 			}				
 		}

@@ -45,7 +45,7 @@ public class MessageSender implements Runnable{
 						clientSocket = new DatagramSocket();
 						IPAddress = InetAddress.getByName(x);					
 						
-						DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 5001);  					     
+						DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 5000);  					     
 						clientSocket.send(sendPacket);		
 						clientSocket.close();	
 						

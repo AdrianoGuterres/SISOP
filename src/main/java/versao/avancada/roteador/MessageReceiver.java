@@ -44,7 +44,7 @@ public class MessageReceiver implements Runnable{
 			String tabela_string = new String( receivePacket.getData());            
 			String stringWithoutBlankSpace = tabela_string.trim();  
 			InetAddress datagramHost = receivePacket.getAddress();
-			String host = datagramHost.getHostAddress();
+			String ipNeighbor = datagramHost.getHostAddress();
 			
 			//Entrando na área crítica
 			try {
@@ -53,7 +53,8 @@ public class MessageReceiver implements Runnable{
 				JOptionPane.showMessageDialog(null,"The table update coultn't be sended : "+ ex);
 			}  
 
-			table.updateTabela(stringWithoutBlankSpace, host);     
+			table.updateTabela(stringWithoutBlankSpace, ipNeighbor);     
+			
 			sem.release();
 			//Saindo da área crítica
 		}
