@@ -21,46 +21,46 @@ public class MessageSender implements Runnable{
 
 	@Override
 	public void run() {
-		
+
 		DatagramSocket clientSocket = null;
 		byte[] sendData;
 		InetAddress IPAddress = null;
-		
+
 		while(true){
-			
+
+			String tabela_string ="";
 			// Entrando na área critica do código
 			try {
 				sem.acquire();
-			String tabela_string = table.get_tabela_string();
-			
-			
-			
-			// Saindo da área critica do código
-				try {
-					sendData = tabela_string.getBytes();				
-					for (String x : neighborIPs) {
-						clientSocket = new DatagramSocket();
-						IPAddress = InetAddress.getByName(x);					
-						
-						DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 5000);  					     
-						clientSocket.send(sendPacket);		
-						clientSocket.close();	
-						
-						if(table.isWereChanged() == true) {
-							Thread.sleep(1000);		
-						}else {
-							Thread.sleep(1000);
-						}						
-					}
-					
-				} catch (Exception ex) {
-					JOptionPane.showMessageDialog(null,"The datagram couldn't be sent: "+ ex);
-				}	
-				
+				tabela_string = new String( table.get_tabela_string());
+
 			} catch (InterruptedException ex) { 
 				JOptionPane.showMessageDialog(null,"The table update coultn't be loaded : "+ ex);
 			}
 			sem.release(); 
+
+			// Saindo da área critica do código
+			try {
+				sendData = tabela_string.getBytes();				
+				for (String x : neighborIPs) {
+					clientSocket = new DatagramSocket();
+					IPAddress = InetAddress.getByName(x);					
+
+					DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 5000);  					     
+					clientSocket.send(sendPacket);		
+					clientSocket.close();	
+
+					if(table.isWereChanged() == true) {
+						Thread.sleep(1000);		
+					}else {
+						Thread.sleep(1000);
+					}						
+				}
+
+			} catch (Exception ex) {
+				JOptionPane.showMessageDialog(null,"The datagram couldn't be sent: "+ ex);
+			}	
+
 		}
 	}
 }

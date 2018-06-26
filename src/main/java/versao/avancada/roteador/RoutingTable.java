@@ -17,12 +17,10 @@ public class RoutingTable {
 	private String localHost;
 
 	private boolean wereChanged;
-	private Semaphore sem; 
 
 	public RoutingTable(ArrayList<String> neighborList) {
 		
 		this.tableForSend = new String();
-		this.sem = new Semaphore(1);		
 		this.wereChanged = false;
 		this.manager = new TuplesManager();			
 		this.neigtborsList = new ArrayList<>(neighborList);
@@ -52,7 +50,7 @@ public class RoutingTable {
 
 
 	//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	public void updateTabela(String receivedTable, String neigtbor){	
+	public synchronized void updateTabela(String receivedTable, String neigtbor){	
 
 		manager.updateByDestiny(neigtbor, 1, neigtbor);
 
@@ -110,7 +108,7 @@ public class RoutingTable {
 	//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-	public String get_tabela_string(){		
+	public synchronized String get_tabela_string(){		
 		
 		String tableForSendTemp = manager.getTableForSend();		
 

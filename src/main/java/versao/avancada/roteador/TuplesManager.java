@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.concurrent.Semaphore;
 
 public class TuplesManager {
@@ -19,11 +20,11 @@ public class TuplesManager {
 	} 
 
 
-	public synchronized void addTuple(String ipDestiny, int metric, String ipOut) {
+	public  void addTuple(String ipDestiny, int metric, String ipOut) {
 		this.tuplesList.add(new Tuple(ipDestiny, metric, ipOut)); 
 	}
 
-	public synchronized Tuple searchByDestiny(String ipDestiny) {
+	public  Tuple searchByDestiny(String ipDestiny) {
 		Tuple tuple = null;
 
 		for(int i =0;i<tuplesList.size(); i++) {
@@ -35,7 +36,7 @@ public class TuplesManager {
 	}
 
 
-	public synchronized  boolean removeTuple(String ipDestiny) {
+	public   boolean removeTuple(String ipDestiny) {
 		boolean aux = false;
 
 
@@ -49,7 +50,7 @@ public class TuplesManager {
 		return aux;
 	}
 
-	public synchronized Tuple updateByDestiny(String ipDestiny, int metric, String ipOut) {
+	public  Tuple updateByDestiny(String ipDestiny, int metric, String ipOut) {
 		Tuple tuple = null;
 		long newTimestamp = System.currentTimeMillis() + 30000;
 		
@@ -67,28 +68,44 @@ public class TuplesManager {
 	}
 
 
-	public synchronized boolean removeNeigtborbyTimestamp() {
-		
+	public  boolean removeNeigtborbyTimestamp() {
+
 		boolean aux = false;
-		for(int i =0;i<tuplesList.size(); i++) {	
-			if((tuplesList.get(i).getTimeStamp()) < System.currentTimeMillis() ) {
-				tuplesList.remove(i);
-				aux = true;		
+		try {
+			sem.acquire();
+			for(int i =0;i<tuplesList.size(); i++) {	
+				if((tuplesList.get(i).getTimeStamp()) < System.currentTimeMillis() ) {
+					tuplesList.remove(i);
+					aux = true;		
+				}
 			}
+			
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		sem.release();
+		
+		
 		return aux;
 	}
 
 
-	public synchronized ArrayList<Tuple> getTuplesList(){
+	public  ArrayList<Tuple> getTuplesList(){
 		return this.tuplesList;
 	}
 
 
-	public synchronized String getTableForSend() {
+	public  String getTableForSend() {
 		String tableForSendTemp = "";
+		
+		HashSet<Tuple> tt = new HashSet<>();
+		
+		for(int i = 0;i<tuplesList.size();i ++) {
+			tt.add(new Tuple(tuplesList.get(i).getIpDestiny(), tuplesList.get(i).getMetric(), tuplesList.get(i).getIpOut()));
+		}
 
-		for(Tuple t : tuplesList){
+		for(Tuple t : tt){
 
 			String aux = new String("*"+t.getIpDestiny()+";"+t.getMetric());
 
@@ -101,7 +118,7 @@ public class TuplesManager {
 	}
 
 	int count = 0;
-	public synchronized void tableForView() {
+	public  void tableForView() {
 		DateFormat formato = new SimpleDateFormat("HH:mm:ss");
 		Date date = new Date();
 		String formattedDate = formato.format(date);
