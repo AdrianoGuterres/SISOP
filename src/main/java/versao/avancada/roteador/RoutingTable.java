@@ -72,7 +72,7 @@ public class RoutingTable {
 
 				String allAux = new String(aux.get(i));
 
-				String[] tuple = allAux.split(";");
+				String[] tuple = allAux.split("\\;");
 
 				System.out.println("Tupla completa: "+tableSplitedForAsterisk[i] + "                                 Destino: "+tuple[0]+"     metrica: "+ tuple[1] +"\n");
 
