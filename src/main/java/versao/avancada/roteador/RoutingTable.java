@@ -101,9 +101,10 @@ public class RoutingTable {
 					}					
 				}	
 				newDestiny = "";
-				newMetric = 0;
-			}				
+				newMetric = 0;				
+			}					
 		}
+		manager.removeNeigtborbyTimestamp();
 	}	
 
 	//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -120,8 +121,12 @@ public class RoutingTable {
 			this.wereChanged = false;
 		}		
 		
+		manager.tableForView();
+		
 		return this.tableForSend;		
 	}
+	
+
 
 	public boolean isWereChanged() {
 		return wereChanged;

@@ -31,12 +31,9 @@ public class MessageSender implements Runnable{
 			// Entrando na área critica do código
 			try {
 				sem.acquire();
-			} catch (InterruptedException ex) { 
-				JOptionPane.showMessageDialog(null,"The table update coultn't be loaded : "+ ex);
-			}
-
 			String tabela_string = table.get_tabela_string();
-			sem.release(); 
+			
+			
 			
 			// Saindo da área critica do código
 				try {
@@ -58,7 +55,12 @@ public class MessageSender implements Runnable{
 					
 				} catch (Exception ex) {
 					JOptionPane.showMessageDialog(null,"The datagram couldn't be sent: "+ ex);
-				}			
+				}	
+				
+			} catch (InterruptedException ex) { 
+				JOptionPane.showMessageDialog(null,"The table update coultn't be loaded : "+ ex);
+			}
+			sem.release(); 
 		}
 	}
 }
