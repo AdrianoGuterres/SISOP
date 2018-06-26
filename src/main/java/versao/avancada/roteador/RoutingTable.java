@@ -20,7 +20,8 @@ public class RoutingTable {
 	private Semaphore sem; 
 
 	public RoutingTable(ArrayList<String> neighborList) {
-
+		
+		this.tableForSend = new String();
 		this.sem = new Semaphore(1);		
 		this.wereChanged = false;
 		this.manager = new TuplesManager();			
@@ -52,37 +53,39 @@ public class RoutingTable {
 
 	//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	public void updateTabela(String receivedTable, String neigtbor){	
-		try { this.sem.acquire(); } catch (InterruptedException e) {}	
 
 		manager.updateByDestiny(neigtbor, 1, neigtbor);
-
 
 		if(receivedTable.trim().contains("!")) {			
 			this.wereChanged = true;
 
 		}else {
-			
-			String[] tableSplitedForAsterisk = receivedTable.trim().split("\\*");
+
+			String[] tableSplitedForAsterisk = receivedTable.split("\\*");
 			ArrayList<String> aux = new ArrayList<>();
-			
+
 			for(int i = 0; i < tableSplitedForAsterisk.length; i++) {
 				aux.add(tableSplitedForAsterisk[i]);								
 			}
-			
-			
+
+
 			for(int i = 1; i < aux.size(); i++) {
 				System.out.println(receivedTable);
-				String[] tuple = aux.get(i).split(";");
+
+				String allAux = new String(aux.get(i));
+
+				String[] tuple = allAux.split(";");
+
 				System.out.println("Tupla completa: "+tableSplitedForAsterisk[i] + "                                 Destino: "+tuple[0]+"     metrica: "+ tuple[1] +"\n");
-				
+
 				String newDestiny = tuple[0];
 				int newMetric = Integer.parseInt(tuple[1]);
 
 				//verifica se é meu ip
 				if(newDestiny.equalsIgnoreCase(this.localHost) == false) {
-					
+
 					if(neigtborsList.contains(newDestiny)== false) {
-						
+
 						Tuple tupleAux = manager.searchByDestiny(newDestiny);
 
 						if(tupleAux != null) {
@@ -93,85 +96,31 @@ public class RoutingTable {
 
 						}else {
 							manager.addTuple(newDestiny, (newMetric + 1), neigtbor);
-						}						
+						}	
+
 					}					
 				}	
 				newDestiny = "";
 				newMetric = 0;
 			}				
 		}
-
-		sem.release();
 	}	
 
 	//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-	private int count = 0;
 
 	public String get_tabela_string(){		
-		try { sem.acquire(); } catch (InterruptedException e) { }
-
-		String tableForSendTemp = "";
-
-
-		for(int i = 0; i<manager.getTuplesList().size(); i++){
-			tableForSendTemp = tableForSendTemp+"*"+ manager.getTuplesList().get(i).getIpDestiny()+";"+manager.getTuplesList().get(i).getMetric();					
-		}
+		
+		String tableForSendTemp = manager.getTableForSend();		
 
 		if(tableForSendTemp.equalsIgnoreCase(this.tableForSend)== false) {
 			this.tableForSend = tableForSendTemp;
 			this.wereChanged = true;				
 		}else {
 			this.wereChanged = false;
-		}			
-
-
-		DateFormat formato = new SimpleDateFormat("HH:mm:ss");
-		Date date = new Date();
-		String formattedDate = formato.format(date);
-
-		if((count == 0) || (tableForSend.length()==0)){
-			System.out.println("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-			System.out.println("Message sending for Routers Neighbors: ");	
-			System.out.println( "!");	
-			System.out.println("\n            Routing Table ");
-			System.out.println("------------------------------------------------------------------------------");
-			System.out.printf("%10s %20s %30s", "Destino", "Metrica", "Saida");
-			System.out.println();
-			System.out.println("------------------------------------------------------------------------------");
-			for(Tuple tupla: this.manager.getTuplesList()){
-				System.out.format("%10s %20s %30s",tupla.getIpDestiny(), tupla.getMetric(), tupla.getIpOut());
-				System.out.println();
-			}
-			System.out.println("------------------------------------------------------------------------------");
-			System.out.println(formattedDate); 
-			System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
-			count++;
-
-		}else {		
-			System.out.println("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-			System.out.println("Message sending for Routers Neighbors: ");	
-			System.out.println(tableForSend);	
-			System.out.println("\n            Routing Table ");
-			System.out.println("------------------------------------------------------------------------------");
-			System.out.printf("%10s %20s %30s", "Destino", "Metrica", "Saida");
-			System.out.println();
-			System.out.println("------------------------------------------------------------------------------");
-			for(Tuple tupla:  this.manager.getTuplesList()){
-				System.out.format("%10s %20s %30s",tupla.getIpDestiny(), tupla.getMetric(), tupla.getIpOut());
-				System.out.println();
-			}
-			System.out.println("------------------------------------------------------------------------------");
-			System.out.println(formattedDate); 
-			System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
-		}			
-
-
-		this.manager.removeNeigtborbyTimestamp();
-
-		sem.release();
-
-		return this.tableForSend;
+		}		
+		
+		return this.tableForSend;		
 	}
 
 	public boolean isWereChanged() {
