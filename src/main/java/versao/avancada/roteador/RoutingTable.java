@@ -12,15 +12,11 @@ public class RoutingTable {
 
 	private TuplesManager manager;
 	private ArrayList<String> neigtborsList;
-
-	private String tableForSend;	
 	private String localHost;
 
 	private boolean wereChanged;
 
 	public RoutingTable(ArrayList<String> neighborList) {
-		
-		this.tableForSend = new String();
 		this.wereChanged = false;
 		this.manager = new TuplesManager();			
 		this.neigtborsList = new ArrayList<>(neighborList);
@@ -37,13 +33,8 @@ public class RoutingTable {
 
 	public void fillTableWithNeibors() {
 		for(int i =0; i < this.neigtborsList.size(); i++) {	
-
 			String newNeigtbor = neigtborsList.get(i);
-
-			manager.addTuple(newNeigtbor, 1, newNeigtbor);
-
-
-			tableForSend = tableForSend+"*"+newNeigtbor+";1";			
+			manager.addTuple(newNeigtbor, 1, newNeigtbor);		
 		}
 	}
 
@@ -74,7 +65,7 @@ public class RoutingTable {
 
 				String[] tuple = allAux.split("\\;");
 
-				System.out.println("Tupla completa: "+tableSplitedForAsterisk[i] + "                                 Destino: "+tuple[0]+"     metrica: "+ tuple[1] +"\n");
+				System.out.println("Tupla completa: "+tableSplitedForAsterisk[i] + "                   Destino: "+tuple[0]+"     metrica: "+ tuple[1] +"\n");
 
 				String newDestiny = tuple[0];
 				int newMetric = Integer.parseInt(tuple[1]);
@@ -102,26 +93,15 @@ public class RoutingTable {
 				newMetric = 0;				
 			}					
 		}
-		manager.removeNeigtborbyTimestamp();
+		
 	}	
 
 	//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-	public synchronized String get_tabela_string(){		
+	public synchronized String get_tabela_string(){			
 		
-		String tableForSendTemp = manager.getTableForSend();		
-
-		if(tableForSendTemp.equalsIgnoreCase(this.tableForSend)== false) {
-			this.tableForSend = tableForSendTemp;
-			this.wereChanged = true;				
-		}else {
-			this.wereChanged = false;
-		}		
-		
-		manager.tableForView();
-		
-		return this.tableForSend;		
+		return 	manager.tableForView();
 	}
 	
 

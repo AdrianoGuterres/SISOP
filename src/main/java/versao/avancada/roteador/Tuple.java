@@ -5,8 +5,10 @@ public class Tuple {
 	private int metric;
 	private String ipOut;
 	private long timeStamp;
+	private boolean visible;
 
 	public Tuple(String ipDestiny, int metric, String ipOut) {
+		setVisible(true);
 		setIpDestiny(ipDestiny);
 		setIpOut(ipOut);			
 		setMetric(metric);
@@ -43,6 +45,14 @@ public class Tuple {
 
 	public void setTimeStamp(long timeStamp) {
 		this.timeStamp = timeStamp;
+	}
+
+	public boolean isVisible() {
+		return visible;
+	}
+
+	public void setVisible(boolean visible) {
+		this.visible = visible;
 	}
 
 }

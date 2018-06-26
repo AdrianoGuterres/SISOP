@@ -27,15 +27,15 @@ public class MessageSender implements Runnable{
 		InetAddress IPAddress = null;
 		
 		while(true){
-			
+			String tabela_string = "";
 			// Entrando na área critica do código
 			try {
 				sem.acquire();
+				tabela_string = table.get_tabela_string();
 			} catch (InterruptedException ex) { 
 				JOptionPane.showMessageDialog(null,"The table update coultn't be loaded : "+ ex);
 			}
-
-			String tabela_string = table.get_tabela_string();
+			
 			sem.release(); 
 			
 			// Saindo da área critica do código
